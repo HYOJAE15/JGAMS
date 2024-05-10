@@ -1,0 +1,12 @@
+*.pyc
+*.spec
+*.exe
+*.toc
+*.zip
+*.pyz
+*.pth
+*.manifest
+*.pkg
+build/*
+dist/*
+testImage/*

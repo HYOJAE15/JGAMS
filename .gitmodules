@@ -1,0 +1,9 @@
+[submodule "dnn/mmsegmentation"]
+	path = dnn/mmsegmentation
+	url = https://github.com/open-mmlab/mmsegmentation
+[submodule "segment-anything"]
+	path = segment-anything
+	url = https://github.com/facebookresearch/segment-anything.git
+[submodule "dnn/segment-anything"]
+	path = dnn/segment-anything
+	url = https://github.com/facebookresearch/segment-anything.git

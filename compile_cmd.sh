@@ -1,0 +1,1 @@
+pyinstaller main.py --hidden-import mmcv._ext --hidden-import pydensecrf.eigen --hidden-import shapely._geos
