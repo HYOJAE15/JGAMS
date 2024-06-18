@@ -1789,21 +1789,23 @@ class Ui_MainWindow(object):
         self.rightToolBox = QFrame(self.content)
         self.rightToolBox.setObjectName(u"rightToolBox")
         self.rightToolBox.setEnabled(True)
-        sizePolicy8 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
-        sizePolicy8.setHorizontalStretch(0)
+        sizePolicy8 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        sizePolicy8.setHorizontalStretch(200)
         sizePolicy8.setVerticalStretch(0)
         sizePolicy8.setHeightForWidth(self.rightToolBox.sizePolicy().hasHeightForWidth())
         self.rightToolBox.setSizePolicy(sizePolicy8)
         self.rightToolBox.setMinimumSize(QSize(200, 0))
+        self.rightToolBox.setMaximumSize(QSize(225, 16777215))
         self.rightToolBox.setSizeIncrement(QSize(0, 0))
         self.rightToolBox.setStyleSheet(u"background-color: rgba(33, 37, 43, 180)")
         self.rightToolBox.setFrameShape(QFrame.StyledPanel)
         self.rightToolBox.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_7 = QVBoxLayout(self.rightToolBox)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.topBarRightToolBox = QFrame(self.rightToolBox)
         self.topBarRightToolBox.setObjectName(u"topBarRightToolBox")
-        self.topBarRightToolBox.setGeometry(QRect(9, 0, 191, 46))
-        sizePolicy4.setHeightForWidth(self.topBarRightToolBox.sizePolicy().hasHeightForWidth())
-        self.topBarRightToolBox.setSizePolicy(sizePolicy4)
+        sizePolicy.setHeightForWidth(self.topBarRightToolBox.sizePolicy().hasHeightForWidth())
+        self.topBarRightToolBox.setSizePolicy(sizePolicy)
         self.topBarRightToolBox.setMaximumSize(QSize(16777215, 50))
         self.topBarRightToolBox.setStyleSheet(u"background-color: rgba(33, 37, 43, 180)")
         self.topBarRightToolBox.setFrameShape(QFrame.NoFrame)
@@ -1812,8 +1814,11 @@ class Ui_MainWindow(object):
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
         self.extraIcon_5 = QFrame(self.topBarRightToolBox)
         self.extraIcon_5.setObjectName(u"extraIcon_5")
-        sizePolicy8.setHeightForWidth(self.extraIcon_5.sizePolicy().hasHeightForWidth())
-        self.extraIcon_5.setSizePolicy(sizePolicy8)
+        sizePolicy9 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        sizePolicy9.setHorizontalStretch(0)
+        sizePolicy9.setVerticalStretch(0)
+        sizePolicy9.setHeightForWidth(self.extraIcon_5.sizePolicy().hasHeightForWidth())
+        self.extraIcon_5.setSizePolicy(sizePolicy9)
         self.extraIcon_5.setMinimumSize(QSize(0, 0))
         self.extraIcon_5.setMaximumSize(QSize(40, 20))
         self.extraIcon_5.setStyleSheet(u"background-position: center;\n"
@@ -1826,8 +1831,8 @@ class Ui_MainWindow(object):
 
         self.extraLabel_5 = QLabel(self.topBarRightToolBox)
         self.extraLabel_5.setObjectName(u"extraLabel_5")
-        sizePolicy8.setHeightForWidth(self.extraLabel_5.sizePolicy().hasHeightForWidth())
-        self.extraLabel_5.setSizePolicy(sizePolicy8)
+        sizePolicy9.setHeightForWidth(self.extraLabel_5.sizePolicy().hasHeightForWidth())
+        self.extraLabel_5.setSizePolicy(sizePolicy9)
         self.extraLabel_5.setMinimumSize(QSize(0, 0))
 
         self.horizontalLayout_8.addWidget(self.extraLabel_5)
@@ -1845,25 +1850,25 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_8.addWidget(self.extraCloseColumnBtn_5)
 
+
+        self.verticalLayout_7.addWidget(self.topBarRightToolBox)
+
         self.toolBoxButtonFrame = QFrame(self.rightToolBox)
         self.toolBoxButtonFrame.setObjectName(u"toolBoxButtonFrame")
-        self.toolBoxButtonFrame.setGeometry(QRect(9, 56, 181, 131))
-        sizePolicy9 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        sizePolicy9.setHorizontalStretch(0)
-        sizePolicy9.setVerticalStretch(0)
-        sizePolicy9.setHeightForWidth(self.toolBoxButtonFrame.sizePolicy().hasHeightForWidth())
-        self.toolBoxButtonFrame.setSizePolicy(sizePolicy9)
+        sizePolicy4.setHeightForWidth(self.toolBoxButtonFrame.sizePolicy().hasHeightForWidth())
+        self.toolBoxButtonFrame.setSizePolicy(sizePolicy4)
+        self.toolBoxButtonFrame.setMaximumSize(QSize(16777215, 275))
         self.toolBoxButtonFrame.setFrameShape(QFrame.StyledPanel)
         self.toolBoxButtonFrame.setFrameShadow(QFrame.Raised)
-        self.gridLayout_3 = QGridLayout(self.toolBoxButtonFrame)
-        self.gridLayout_3.setSpacing(10)
-        self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_15 = QVBoxLayout(self.toolBoxButtonFrame)
+        self.verticalLayout_15.setSpacing(10)
+        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
+        self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
         self.brushButton = QPushButton(self.toolBoxButtonFrame)
         self.brushButton.setObjectName(u"brushButton")
         sizePolicy1.setHeightForWidth(self.brushButton.sizePolicy().hasHeightForWidth())
         self.brushButton.setSizePolicy(sizePolicy1)
-        self.brushButton.setMinimumSize(QSize(0, 30))
+        self.brushButton.setMinimumSize(QSize(30, 38))
         self.brushButton.setFont(font)
         self.brushButton.setCursor(QCursor(Qt.PointingHandCursor))
         self.brushButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
@@ -1877,13 +1882,13 @@ class Ui_MainWindow(object):
         self.brushButton.setCheckable(True)
         self.brushButton.setChecked(False)
 
-        self.gridLayout_3.addWidget(self.brushButton, 0, 0, 1, 1)
+        self.verticalLayout_15.addWidget(self.brushButton)
 
         self.eraseButton = QPushButton(self.toolBoxButtonFrame)
         self.eraseButton.setObjectName(u"eraseButton")
         sizePolicy1.setHeightForWidth(self.eraseButton.sizePolicy().hasHeightForWidth())
         self.eraseButton.setSizePolicy(sizePolicy1)
-        self.eraseButton.setMinimumSize(QSize(0, 30))
+        self.eraseButton.setMinimumSize(QSize(30, 38))
         self.eraseButton.setFont(font)
         self.eraseButton.setCursor(QCursor(Qt.PointingHandCursor))
         self.eraseButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
@@ -1897,13 +1902,33 @@ class Ui_MainWindow(object):
         self.eraseButton.setCheckable(True)
         self.eraseButton.setChecked(False)
 
-        self.gridLayout_3.addWidget(self.eraseButton, 0, 1, 1, 1)
+        self.verticalLayout_15.addWidget(self.eraseButton)
+
+        self.gpsButton = QPushButton(self.toolBoxButtonFrame)
+        self.gpsButton.setObjectName(u"gpsButton")
+        sizePolicy1.setHeightForWidth(self.gpsButton.sizePolicy().hasHeightForWidth())
+        self.gpsButton.setSizePolicy(sizePolicy1)
+        self.gpsButton.setMinimumSize(QSize(30, 38))
+        self.gpsButton.setFont(font)
+        self.gpsButton.setCursor(QCursor(Qt.PointingHandCursor))
+        self.gpsButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
+".QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
+".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
+".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
+"")
+        icon10 = QIcon()
+        icon10.addFile(u":/icons/images/icons/cil-share-boxed.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.gpsButton.setIcon(icon10)
+        self.gpsButton.setCheckable(True)
+        self.gpsButton.setChecked(False)
+
+        self.verticalLayout_15.addWidget(self.gpsButton)
 
         self.autoLabelButton = QPushButton(self.toolBoxButtonFrame)
         self.autoLabelButton.setObjectName(u"autoLabelButton")
         sizePolicy1.setHeightForWidth(self.autoLabelButton.sizePolicy().hasHeightForWidth())
         self.autoLabelButton.setSizePolicy(sizePolicy1)
-        self.autoLabelButton.setMinimumSize(QSize(0, 30))
+        self.autoLabelButton.setMinimumSize(QSize(30, 38))
         self.autoLabelButton.setFont(font)
         self.autoLabelButton.setCursor(QCursor(Qt.PointingHandCursor))
         self.autoLabelButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
@@ -1911,39 +1936,21 @@ class Ui_MainWindow(object):
 ".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 "")
-        icon10 = QIcon()
-        icon10.addFile(u":/icons/images/icons/icon-ai.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.autoLabelButton.setIcon(icon10)
+        icon11 = QIcon()
+        icon11.addFile(u":/icons/images/icons/icon-ai.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.autoLabelButton.setIcon(icon11)
         self.autoLabelButton.setCheckable(True)
 
-        self.gridLayout_3.addWidget(self.autoLabelButton, 1, 0, 1, 1)
+        self.verticalLayout_15.addWidget(self.autoLabelButton)
 
-        self.enhancementButton = QPushButton(self.toolBoxButtonFrame)
-        self.enhancementButton.setObjectName(u"enhancementButton")
-        sizePolicy1.setHeightForWidth(self.enhancementButton.sizePolicy().hasHeightForWidth())
-        self.enhancementButton.setSizePolicy(sizePolicy1)
-        self.enhancementButton.setMinimumSize(QSize(0, 30))
-        self.enhancementButton.setFont(font)
-        self.enhancementButton.setCursor(QCursor(Qt.PointingHandCursor))
-        self.enhancementButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
-".QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
-".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
-".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
-"")
-        icon11 = QIcon()
-        icon11.addFile(u":/icons/images/icons/icon-enhancement.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.enhancementButton.setIcon(icon11)
-        self.enhancementButton.setCheckable(True)
-        self.enhancementButton.setChecked(False)
 
-        self.gridLayout_3.addWidget(self.enhancementButton, 1, 1, 1, 1)
+        self.verticalLayout_7.addWidget(self.toolBoxButtonFrame)
 
         self.frame_2 = QFrame(self.rightToolBox)
         self.frame_2.setObjectName(u"frame_2")
-        self.frame_2.setGeometry(QRect(10, 190, 181, 371))
-        sizePolicy9.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
-        self.frame_2.setSizePolicy(sizePolicy9)
-        self.frame_2.setMinimumSize(QSize(0, 371))
+        sizePolicy6.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
+        self.frame_2.setSizePolicy(sizePolicy6)
+        self.frame_2.setMinimumSize(QSize(0, 275))
         self.frame_2.setFrameShape(QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_13 = QHBoxLayout(self.frame_2)
@@ -1952,6 +1959,9 @@ class Ui_MainWindow(object):
         self.classList.setObjectName(u"classList")
 
         self.horizontalLayout_13.addWidget(self.classList)
+
+
+        self.verticalLayout_7.addWidget(self.frame_2)
 
 
         self.horizontalLayout_4.addWidget(self.rightToolBox)
@@ -2227,12 +2237,12 @@ class Ui_MainWindow(object):
         self.extraCloseColumnBtn_5.setText("")
         self.brushButton.setText("")
         self.eraseButton.setText("")
+        self.gpsButton.setText("")
         self.autoLabelButton.setText("")
-        self.enhancementButton.setText("")
         self.btn_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
         self.btn_print.setText(QCoreApplication.translate("MainWindow", u"Print", None))
         self.btn_logout.setText(QCoreApplication.translate("MainWindow", u"Logout", None))
-        self.creditsLabel.setText(QCoreApplication.translate("MainWindow", u"CHALK", None))
+        self.creditsLabel.setText(QCoreApplication.translate("MainWindow", u"JGAMS", None))
         self.version.setText(QCoreApplication.translate("MainWindow", u"v1.0.0", None))
     # retranslateUi
 

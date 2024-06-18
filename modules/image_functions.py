@@ -156,87 +156,7 @@ class ImageFunctions(DNNFunctions):
 
         self.sam_y_idx = []
         self.sam_x_idx = []
-    
-    def useEnhancement(self, event):
-        """
-        Label Enhancement Tool
-        """
         
-        event_global = mainWidgets.mainImageViewer.mapFromGlobal(event.globalPos())
-
-        x, y = getScaledPoint(event_global, self.scale)
-        
-        if (self.x != x) or (self.y != y) : 
-
-            if self.x > x :
-                min_x = x
-                max_x = self.x
-            else :
-                min_x = self.x
-                max_x = x
-
-            if self.y > y :
-                min_y = y
-                max_y = self.y
-            else :
-                min_y = self.y
-                max_y = y
-
-            # get the region of interest
-            img = cvtPixmapToArray(self.pixmap)
-            img_roi = img[min_y:max_y, min_x:max_x, :3]
-            label_roi = self.label[min_y:max_y, min_x:max_x]
-            label_roi = label_roi.astype(np.uint8)
-
-            label_roi = self.applyDenseCRF(img_roi, label_roi)
-
-            self.label[min_y:max_y, min_x:max_x] = label_roi
-
-            # update colormap
-            self.updateColorMap()
-
-        self.x = x
-        self.y = y
-        
-    def enhanceLabel(self):
-        """
-        Label Enhancement Tool
-        """
-        # get the current image
-        img = cvtPixmapToArray(self.pixmap)
-
-        # get binary image of current label
-        current_label = self.label == self.brush_class
-
-        # loop through each object in the label
-        labeled = skimage.measure.label(current_label)
-
-        for region in skimage.measure.regionprops(labeled):
-
-            # get the bounding box coordinates
-            min_y, min_x, max_y, max_x = region.bbox
-
-            # get the region of interest
-            img_roi = img[min_y:max_y, min_x:max_x, :3]
-            label_roi = current_label[min_y:max_y, min_x:max_x]
-            label_roi = label_roi.astype(np.uint8)
-
-            # run the enhancement algorithm
-            label_roi = self.applyDenseCRF(img_roi, label_roi)
-
-            # remain only the largest object
-            label_roi = skimage.measure.label(label_roi)
-            label_roi = label_roi == np.argmax(np.bincount(label_roi.flat)[1:]) + 1
-
-            # smooth the label
-            label_roi = skimage.morphology.binary_closing(label_roi, skimage.morphology.square(3))
-
-            # update the label
-            self.label[min_y:max_y, min_x:max_x] = label_roi * self.brush_class
-
-        # update colormap
-        self.updateColorMap()
-
     def set_button_state(self, use_autolabel=False, use_refinement=False, use_brush=False, use_erase=False):
         """
         Set the state of the buttons
@@ -249,7 +169,7 @@ class ImageFunctions(DNNFunctions):
         mainWidgets.brushButton.setChecked(use_brush)
         mainWidgets.eraseButton.setChecked(use_erase)
         mainWidgets.autoLabelButton.setChecked(use_autolabel)
-        mainWidgets.enhancementButton.setChecked(use_refinement)
+        mainWidgets.gpsButton.setChecked(use_refinement)
         
 
 
@@ -644,12 +564,6 @@ class ImageFunctions(DNNFunctions):
 
         event_global = mainWidgets.mainImageViewer.mapFromGlobal(event.globalPos())
         x, y = getScaledPoint(event_global, self.scale)
-
-        if self.use_refinement :
-            self.useEnhancement(event)
-
-        # if self.use_grabcut : 
-        #     self.useGrabCut(event)
 
         if self.use_autolabel:
             # if mouse is not moved 

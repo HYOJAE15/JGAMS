@@ -13,7 +13,6 @@ from mmdet.apis import init_detector, inference_detector
 from pydensecrf.utils import unary_from_labels, create_pairwise_bilateral, create_pairwise_gaussian
 from skimage.morphology import skeletonize
 
-import pydensecrf.densecrf as dcrf 
 import numpy as np
 
 import skimage.morphology
@@ -169,12 +168,12 @@ class DNNFunctions(object):
         mask = result.pred_sem_seg.data.cpu().numpy()
         mask = np.squeeze(mask)
 
-        if do_crf:
-            crf = self.applyDenseCRF(img, mask)
-            skel = skeletonize(mask)
+        # if do_crf:
+        #     crf = self.applyDenseCRF(img, mask)
+        #     skel = skeletonize(mask)
 
-            crf[skel] = 1
-            mask = crf
+        #     crf[skel] = 1
+        #     mask = crf
 
         mask = skimage.morphology.binary_closing(mask, skimage.morphology.square(3))
 
@@ -188,7 +187,6 @@ class DNNFunctions(object):
             checkpoint_file (str): The path to the checkpoint file.
         """
         self.mmdet_model = init_detector(config_file, checkpoint_file, device='cpu')
-
 
     def inference_mmdet(self, img, model):
         """
@@ -216,47 +214,6 @@ class DNNFunctions(object):
 
         return bboxes, scores
 
-
-    @staticmethod
-    def applyDenseCRF(img, label, num_iter=3):
-        """
-        Apply DenseCRF to the image and label
-
-        Args:
-            img (np.ndarray): The image to be processed.
-            label (np.ndarray): The label to be processed.
-            num_iter (int): The number of iterations.
-
-        Returns:
-            label (np.ndarray): The processed label.
-        """
-        num_labels = np.max(label) + 1
-
-        d = dcrf.DenseCRF2D(img.shape[1], img.shape[0], num_labels)
-
-        U = unary_from_labels(label, num_labels, gt_prob=0.7, zero_unsure=False)
-
-        d.setUnaryEnergy(U)
-
-        feats = create_pairwise_gaussian(sdims=(3, 3), shape=img.shape[:2])
-        d.addPairwiseEnergy(feats, compat=3,
-                            kernel=dcrf.DIAG_KERNEL,
-                            normalization=dcrf.NORMALIZE_SYMMETRIC)
-
-        # This creates the color-dependent features and then add them to the CRF
-        feats = create_pairwise_bilateral(sdims=(50, 50), schan=(13, 13, 13),
-                                            img=img, chdim=2)
-        d.addPairwiseEnergy(feats, compat=10,
-                            kernel=dcrf.DIAG_KERNEL,
-                            normalization=dcrf.NORMALIZE_SYMMETRIC)
-
-        Q = d.inference(num_iter)
-
-        MAP = np.argmax(Q, axis=0)
-
-        return MAP.reshape((img.shape[0], img.shape[1]))
-
-    
     @staticmethod
     def cvtRGBATORGB(img):
         """Convert a RGBA image to a RGB image
