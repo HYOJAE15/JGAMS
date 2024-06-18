@@ -812,7 +812,7 @@ background-repeat: no-repeat;</string>
                    <enum>Qt::LeftToRight</enum>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">image: url(:/icons/images/icons/icon_menu.png);</string>
+                   <string notr="true">background-image: url(:/icons/images/icons/icon_menu.png);</string>
                   </property>
                  </widget>
                 </item>
@@ -873,7 +873,7 @@ background-repeat: no-repeat;</string>
                    <enum>Qt::LeftToRight</enum>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">image: url(:/icons/images/icons/cil-home.png);</string>
+                   <string notr="true">background-image: url(:/icons/images/icons/cil-home.png);</string>
                   </property>
                  </widget>
                 </item>
@@ -907,7 +907,7 @@ background-repeat: no-repeat;</string>
                    <enum>Qt::LeftToRight</enum>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">image: url(:/icons/images/icons/icon-project.png);</string>
+                   <string notr="true">background-image: url(:/icons/images/icons/icon-project.png);</string>
                   </property>
                  </widget>
                 </item>
@@ -941,7 +941,7 @@ background-repeat: no-repeat;</string>
                    <enum>Qt::LeftToRight</enum>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">image: url(:/icons/images/icons/icon-images.png);</string>
+                   <string notr="true">background-image: url(:/icons/images/icons/icon-images.png);</string>
                   </property>
                  </widget>
                 </item>
@@ -975,7 +975,7 @@ background-repeat: no-repeat;</string>
                    <enum>Qt::LeftToRight</enum>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">image: url(:/icons/images/icons/cil-save.png)</string>
+                   <string notr="true">background-image: url(:/icons/images/icons/cil-save.png)</string>
                   </property>
                  </widget>
                 </item>

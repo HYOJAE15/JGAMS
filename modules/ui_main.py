@@ -653,7 +653,7 @@ class Ui_MainWindow(object):
         self.toggleButton.setFont(font)
         self.toggleButton.setCursor(QCursor(Qt.PointingHandCursor))
         self.toggleButton.setLayoutDirection(Qt.LeftToRight)
-        self.toggleButton.setStyleSheet(u"image: url(:/icons/images/icons/icon_menu.png);")
+        self.toggleButton.setStyleSheet(u"background-image: url(:/icons/images/icons/icon_menu.png);")
 
         self.verticalLayout_4.addWidget(self.toggleButton)
 
@@ -676,7 +676,7 @@ class Ui_MainWindow(object):
         self.btn_home.setFont(font)
         self.btn_home.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_home.setLayoutDirection(Qt.LeftToRight)
-        self.btn_home.setStyleSheet(u"image: url(:/icons/images/icons/cil-home.png);")
+        self.btn_home.setStyleSheet(u"background-image: url(:/icons/images/icons/cil-home.png);")
 
         self.verticalLayout_8.addWidget(self.btn_home)
 
@@ -688,7 +688,7 @@ class Ui_MainWindow(object):
         self.projectButton.setFont(font)
         self.projectButton.setCursor(QCursor(Qt.PointingHandCursor))
         self.projectButton.setLayoutDirection(Qt.LeftToRight)
-        self.projectButton.setStyleSheet(u"image: url(:/icons/images/icons/icon-project.png);")
+        self.projectButton.setStyleSheet(u"background-image: url(:/icons/images/icons/icon-project.png);")
 
         self.verticalLayout_8.addWidget(self.projectButton)
 
@@ -700,7 +700,7 @@ class Ui_MainWindow(object):
         self.imageButton.setFont(font)
         self.imageButton.setCursor(QCursor(Qt.PointingHandCursor))
         self.imageButton.setLayoutDirection(Qt.LeftToRight)
-        self.imageButton.setStyleSheet(u"image: url(:/icons/images/icons/icon-images.png);")
+        self.imageButton.setStyleSheet(u"background-image: url(:/icons/images/icons/icon-images.png);")
 
         self.verticalLayout_8.addWidget(self.imageButton)
 
@@ -712,7 +712,7 @@ class Ui_MainWindow(object):
         self.btn_save.setFont(font)
         self.btn_save.setCursor(QCursor(Qt.PointingHandCursor))
         self.btn_save.setLayoutDirection(Qt.LeftToRight)
-        self.btn_save.setStyleSheet(u"image: url(:/icons/images/icons/cil-save.png)")
+        self.btn_save.setStyleSheet(u"background-image: url(:/icons/images/icons/cil-save.png)")
 
         self.verticalLayout_8.addWidget(self.btn_save)
 
