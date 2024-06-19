@@ -1,0 +1,3 @@
+[submodule "submodules/GroundingDINO"]
+	path = submodules/GroundingDINO
+	url = https://github.com/HYOJAE15/GroundingDINO.git
