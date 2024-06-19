@@ -72,6 +72,5 @@ python setup.py develop
 Checkpoints for the autolabeling function are available at the following links and should be placed in the `dnn/checkpoints` directory:
 
 [Segment Anything Model (vit_h)](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)
-[CGNet trained for Crack Detection](https://www.dropbox.com/s/okikp25lw58jg8y/cgnet.pth?dl=0)\
 
-Once you've completed these steps, CHALK should be installed and ready to use on your desktop.
+Once you've completed these steps, JGAMS should be installed and ready to use on your desktop.
