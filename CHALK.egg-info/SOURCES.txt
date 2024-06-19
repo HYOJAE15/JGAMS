@@ -1,5 +1,3 @@
-LICENSE
-README.md
 setup.py
 CHALK.egg-info/PKG-INFO
 CHALK.egg-info/SOURCES.txt
@@ -11,6 +9,7 @@ modules/dnn_functions.py
 modules/image_functions.py
 modules/project_functions.py
 modules/ui_brush_menu.py
+modules/ui_erase_menu.py
 modules/ui_functions.py
 modules/ui_main.py
 modules/ui_project_class.py

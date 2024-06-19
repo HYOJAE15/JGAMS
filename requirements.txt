@@ -3,3 +3,4 @@ scikit-image
 numba
 PySide6
 slidingwindow
+ftfy

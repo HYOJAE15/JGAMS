@@ -8,9 +8,6 @@ from .app_settings import Settings
 
 from mmseg.apis import init_model, inference_model
 
-from mmdet.apis import init_detector, inference_detector
-
-from pydensecrf.utils import unary_from_labels, create_pairwise_bilateral, create_pairwise_gaussian
 from skimage.morphology import skeletonize
 
 import numpy as np
@@ -179,41 +176,7 @@ class DNNFunctions(object):
 
         return mask
     
-    def load_mmdet (self, config_file, checkpoint_file):
-        """
-        Load the mmdet model
-        Args:
-            config_file (str): The path to the config file.
-            checkpoint_file (str): The path to the checkpoint file.
-        """
-        self.mmdet_model = init_detector(config_file, checkpoint_file, device='cpu')
-
-    def inference_mmdet(self, img, model):
-        """
-        Inference the image with the mmseg model
-
-        Args:
-            img (np.ndarray): The image to be processed.
-            model: mmdetection model
-
-        Returns:
-            bboxes (np.ndarray): The processed bboxes.
-            scores (np.ndarray): The processed scores.
-        """
-
-        img = self.cvtRGBATORGB(img)
-        
-        result = inference_detector(model, img)
-
-        bboxes = result.pred_instances.bboxes.cpu().numpy()
-        bboxes = np.squeeze(bboxes)
-
-        scores = result.pred_instances.scores.cpu().numpy()
-        scores = np.squeeze(scores)
-
-
-        return bboxes, scores
-
+    
     @staticmethod
     def cvtRGBATORGB(img):
         """Convert a RGBA image to a RGB image

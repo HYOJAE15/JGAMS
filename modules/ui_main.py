@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.0
+## Created by: Qt User Interface Compiler version 6.6.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -644,7 +644,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.toggleButton = QPushButton(self.toggleBox)
         self.toggleButton.setObjectName(u"toggleButton")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.toggleButton.sizePolicy().hasHeightForWidth())
@@ -752,7 +752,7 @@ class Ui_MainWindow(object):
 
         self.extraLeftBox = QFrame(self.bgApp)
         self.extraLeftBox.setObjectName(u"extraLeftBox")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.extraLeftBox.sizePolicy().hasHeightForWidth())
@@ -901,7 +901,7 @@ class Ui_MainWindow(object):
 
         self.imageLeftBox = QFrame(self.bgApp)
         self.imageLeftBox.setObjectName(u"imageLeftBox")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.imageLeftBox.sizePolicy().hasHeightForWidth())
@@ -1034,7 +1034,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.addImageButton = QPushButton(self.frame_4)
         self.addImageButton.setObjectName(u"addImageButton")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.addImageButton.sizePolicy().hasHeightForWidth())
@@ -1266,7 +1266,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setContentsMargins(0, 0, 10, 0)
         self.leftBox = QFrame(self.contentTopBg)
         self.leftBox.setObjectName(u"leftBox")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.leftBox.sizePolicy().hasHeightForWidth())
@@ -1279,7 +1279,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.titleRightInfo = QLabel(self.leftBox)
         self.titleRightInfo.setObjectName(u"titleRightInfo")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.titleRightInfo.sizePolicy().hasHeightForWidth())
@@ -1676,7 +1676,7 @@ class Ui_MainWindow(object):
         __qtablewidgetitem23 = QTableWidgetItem()
         self.tableWidget.setItem(0, 3, __qtablewidgetitem23)
         self.tableWidget.setObjectName(u"tableWidget")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy6.setHorizontalStretch(0)
         sizePolicy6.setVerticalStretch(0)
         sizePolicy6.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
@@ -1743,7 +1743,7 @@ class Ui_MainWindow(object):
         self.scrollAreaImage = QScrollArea(self.imagePage)
         self.scrollAreaImage.setObjectName(u"scrollAreaImage")
         self.scrollAreaImage.setEnabled(True)
-        sizePolicy7 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy7.setHorizontalStretch(0)
         sizePolicy7.setVerticalStretch(0)
         sizePolicy7.setHeightForWidth(self.scrollAreaImage.sizePolicy().hasHeightForWidth())
@@ -1789,7 +1789,7 @@ class Ui_MainWindow(object):
         self.rightToolBox = QFrame(self.content)
         self.rightToolBox.setObjectName(u"rightToolBox")
         self.rightToolBox.setEnabled(True)
-        sizePolicy8 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        sizePolicy8 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         sizePolicy8.setHorizontalStretch(200)
         sizePolicy8.setVerticalStretch(0)
         sizePolicy8.setHeightForWidth(self.rightToolBox.sizePolicy().hasHeightForWidth())
@@ -1800,10 +1800,9 @@ class Ui_MainWindow(object):
         self.rightToolBox.setStyleSheet(u"background-color: rgba(33, 37, 43, 180)")
         self.rightToolBox.setFrameShape(QFrame.StyledPanel)
         self.rightToolBox.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_7 = QVBoxLayout(self.rightToolBox)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.topBarRightToolBox = QFrame(self.rightToolBox)
         self.topBarRightToolBox.setObjectName(u"topBarRightToolBox")
+        self.topBarRightToolBox.setGeometry(QRect(9, 9, 182, 46))
         sizePolicy.setHeightForWidth(self.topBarRightToolBox.sizePolicy().hasHeightForWidth())
         self.topBarRightToolBox.setSizePolicy(sizePolicy)
         self.topBarRightToolBox.setMaximumSize(QSize(16777215, 50))
@@ -1814,7 +1813,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
         self.extraIcon_5 = QFrame(self.topBarRightToolBox)
         self.extraIcon_5.setObjectName(u"extraIcon_5")
-        sizePolicy9 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
         sizePolicy9.setHorizontalStretch(0)
         sizePolicy9.setVerticalStretch(0)
         sizePolicy9.setHeightForWidth(self.extraIcon_5.sizePolicy().hasHeightForWidth())
@@ -1850,13 +1849,12 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_8.addWidget(self.extraCloseColumnBtn_5)
 
-
-        self.verticalLayout_7.addWidget(self.topBarRightToolBox)
-
         self.toolBoxButtonFrame = QFrame(self.rightToolBox)
         self.toolBoxButtonFrame.setObjectName(u"toolBoxButtonFrame")
+        self.toolBoxButtonFrame.setGeometry(QRect(9, 61, 182, 249))
         sizePolicy4.setHeightForWidth(self.toolBoxButtonFrame.sizePolicy().hasHeightForWidth())
         self.toolBoxButtonFrame.setSizePolicy(sizePolicy4)
+        self.toolBoxButtonFrame.setMinimumSize(QSize(0, 249))
         self.toolBoxButtonFrame.setMaximumSize(QSize(16777215, 275))
         self.toolBoxButtonFrame.setFrameShape(QFrame.StyledPanel)
         self.toolBoxButtonFrame.setFrameShadow(QFrame.Raised)
@@ -1924,6 +1922,22 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_15.addWidget(self.gpsButton)
 
+        self.label = QLabel(self.toolBoxButtonFrame)
+        self.label.setObjectName(u"label")
+        self.label.setFrameShape(QFrame.WinPanel)
+        self.label.setFrameShadow(QFrame.Sunken)
+        self.label.setTextFormat(Qt.AutoText)
+        self.label.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_15.addWidget(self.label)
+
+        self.comboBox_2 = QComboBox(self.toolBoxButtonFrame)
+        self.comboBox_2.addItem("")
+        self.comboBox_2.addItem("")
+        self.comboBox_2.setObjectName(u"comboBox_2")
+
+        self.verticalLayout_15.addWidget(self.comboBox_2)
+
         self.autoLabelButton = QPushButton(self.toolBoxButtonFrame)
         self.autoLabelButton.setObjectName(u"autoLabelButton")
         sizePolicy1.setHeightForWidth(self.autoLabelButton.sizePolicy().hasHeightForWidth())
@@ -1943,14 +1957,15 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_15.addWidget(self.autoLabelButton)
 
-
-        self.verticalLayout_7.addWidget(self.toolBoxButtonFrame)
-
         self.frame_2 = QFrame(self.rightToolBox)
         self.frame_2.setObjectName(u"frame_2")
-        sizePolicy6.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
-        self.frame_2.setSizePolicy(sizePolicy6)
-        self.frame_2.setMinimumSize(QSize(0, 275))
+        self.frame_2.setGeometry(QRect(9, 316, 182, 238))
+        sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        sizePolicy10.setHorizontalStretch(0)
+        sizePolicy10.setVerticalStretch(0)
+        sizePolicy10.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
+        self.frame_2.setSizePolicy(sizePolicy10)
+        self.frame_2.setMinimumSize(QSize(0, 238))
         self.frame_2.setFrameShape(QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_13 = QHBoxLayout(self.frame_2)
@@ -1959,9 +1974,6 @@ class Ui_MainWindow(object):
         self.classList.setObjectName(u"classList")
 
         self.horizontalLayout_13.addWidget(self.classList)
-
-
-        self.verticalLayout_7.addWidget(self.frame_2)
 
 
         self.horizontalLayout_4.addWidget(self.rightToolBox)
@@ -2238,6 +2250,10 @@ class Ui_MainWindow(object):
         self.brushButton.setText("")
         self.eraseButton.setText("")
         self.gpsButton.setText("")
+        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">A.I.</span></p></body></html>", None))
+        self.comboBox_2.setItemText(0, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\uc7a5", None))
+        self.comboBox_2.setItemText(1, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\ud3f4\ub354", None))
+
         self.autoLabelButton.setText("")
         self.btn_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
         self.btn_print.setText(QCoreApplication.translate("MainWindow", u"Print", None))
