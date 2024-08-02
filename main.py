@@ -200,9 +200,8 @@ class MainWindow(
         elif event.key() == 16777249: # Ctrl key
             self.ControlKey = True
 
-        # elif event.key() == 16777251: # alt key
-        #     self.AltKey = True
-        #     print("alt-true")
+        elif event.key() == 16777251: # alt key
+            self.inferenceGroundingDino()
 
         elif event.key() == 83: # S key 
             if self.ControlKey:

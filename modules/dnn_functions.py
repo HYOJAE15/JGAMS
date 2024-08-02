@@ -18,6 +18,8 @@ from .utils import cvtPixmapToArray
 
 from segment_anything import sam_model_registry, SamPredictor
 
+from submodules.GroundingDINO.groundingdino.util.inference import load_model, load_image, predict, annotate
+
 class SAMWindow(QMainWindow, UIFunctions):
     def __init__(self):
         QMainWindow.__init__(self)
@@ -77,35 +79,42 @@ class DNNFunctions(object):
         #########################
         
         # MMSegmentation
-        self.mmseg_config = 'dnn/configs/cgnet.py'
-        self.mmseg_checkpoint = 'dnn/checkpoints/cgnet.pth'
+        self.mmseg_config = 'dnn/configs/promptModel.py'
+        self.mmseg_checkpoint = 'dnn/checkpoints/promptModel.pth'
         # Segment Anything
         self.sam_checkpoint = 'dnn/checkpoints/sam_vit_h_4b8939.pth'
 
         #################### 
         # Object Detection #
         ####################
-
-        # Crack
-        self.mmdet_crack_config = 'dnn/configs/fasterrcnn_r50_crack_2x.py'
-        self.mmdet_crack_checkpoint = 'dnn/checkpoints/fasterrcnn_r50_crack_2x.pth'
-        # Efflorescence
-        self.mmdet_efflorescence_config = 'dnn/configs/fasterrcnn_r50_efflorescence_2x.py'
-        self.mmdet_efflorescence_checkpoint = 'dnn/checkpoints/fasterrcnn_r50_efflorescence_2x.pth'
-        # Rebar Exposure
-        self.mmdet_rebarExposure_config = 'dnn/configs/fasterrcnn_r50_rebarExposure_2x.py'
-        self.mmdet_rebarExposure_checkpoint = 'dnn/checkpoints/fasterrcnn_r50_rebarExposure_2x.pth'
-        # Spalling
-        self.mmdet_spalling_config = 'dnn/configs/fasterrcnn_r50_spalling_2x.py'
-        self.mmdet_spalling_checkpoint = 'dnn/checkpoints/fasterrcnn_r50_spalling_2x.pth'
         
+        # GroundingDINO
+        self.groundingDino_config = 'dnn/configs/GroundingDINO_SwinB_cfg.py'
+        self.groundingDino_checkpoint = 'dnn/checkpoints/groundingdino_swinb_cogcoor.pth'
+
         ##############
         # Attributes #
         ##############
         
         self.scale = 1.0
 
+    def load_groundingDino(self, config, checkpoint):
+        self.groundingDino_model = load_model(config, checkpoint)
     
+    def inference_groundingDino(self, model, image, caption, box_threshold, text_threshold, device="cuda"):
+
+        boxes, logits, phrases = predict(
+            model=model,
+            image=image,
+            caption=caption,
+            box_threshold=box_threshold,
+            text_threshold=text_threshold,
+            device=device
+            )
+        
+        return boxes, logits, phrases
+
+
     def load_sam(self, checkpoint, mode='default'):
         """
         Load the sam model
@@ -151,12 +160,12 @@ class DNNFunctions(object):
 
         """
         # filter image size too small or too large
-        if img.shape[0] < 50 or img.shape[1] < 50 :
-            print(f"too small")
-            return np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
-        elif img.shape[0] > 1000 or img.shape[1] > 1000 :
-            print(f"too large")
-            return np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+        # if img.shape[0] < 50 or img.shape[1] < 50 :
+        #     print(f"too small")
+        #     return np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+        # elif img.shape[0] > 1000 or img.shape[1] > 1000 :
+        #     print(f"too large")
+        #     return np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
 
         img = self.cvtRGBATORGB(img)
 
@@ -165,6 +174,17 @@ class DNNFunctions(object):
         mask = result.pred_sem_seg.data.cpu().numpy()
         mask = np.squeeze(mask)
 
+        logits = result.seg_logits.data.cpu().numpy()
+        
+        
+        back = mask == 0
+        joint = mask == 1
+        gap = mask == 2
+
+        print(f"bf: {mask}")
+        print(f"logit: {logits}")
+        
+
         # if do_crf:
         #     crf = self.applyDenseCRF(img, mask)
         #     skel = skeletonize(mask)
@@ -172,9 +192,14 @@ class DNNFunctions(object):
         #     crf[skel] = 1
         #     mask = crf
 
-        mask = skimage.morphology.binary_closing(mask, skimage.morphology.square(3))
+        back = skimage.morphology.binary_closing(back, skimage.morphology.square(3))
+        joint = skimage.morphology.binary_closing(joint, skimage.morphology.square(3))
+        gap = skimage.morphology.binary_closing(gap, skimage.morphology.square(3))
+        
 
-        return mask
+        print(f"af: {mask}")
+
+        return back, joint, gap, logits
     
     
     @staticmethod

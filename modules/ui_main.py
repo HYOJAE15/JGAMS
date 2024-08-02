@@ -1811,77 +1811,31 @@ class Ui_MainWindow(object):
         self.topBarRightToolBox.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_8 = QHBoxLayout(self.topBarRightToolBox)
         self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
-        self.extraIcon_5 = QFrame(self.topBarRightToolBox)
-        self.extraIcon_5.setObjectName(u"extraIcon_5")
+        self.extraLabel_5 = QLabel(self.topBarRightToolBox)
+        self.extraLabel_5.setObjectName(u"extraLabel_5")
         sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
         sizePolicy9.setHorizontalStretch(0)
         sizePolicy9.setVerticalStretch(0)
-        sizePolicy9.setHeightForWidth(self.extraIcon_5.sizePolicy().hasHeightForWidth())
-        self.extraIcon_5.setSizePolicy(sizePolicy9)
-        self.extraIcon_5.setMinimumSize(QSize(0, 0))
-        self.extraIcon_5.setMaximumSize(QSize(40, 20))
-        self.extraIcon_5.setStyleSheet(u"background-position: center;\n"
-"	background-repeat: no-repeat;\n"
-"	background-image: url(:/icons/images/icons/icon-tool.png);")
-        self.extraIcon_5.setFrameShape(QFrame.NoFrame)
-        self.extraIcon_5.setFrameShadow(QFrame.Raised)
-
-        self.horizontalLayout_8.addWidget(self.extraIcon_5)
-
-        self.extraLabel_5 = QLabel(self.topBarRightToolBox)
-        self.extraLabel_5.setObjectName(u"extraLabel_5")
         sizePolicy9.setHeightForWidth(self.extraLabel_5.sizePolicy().hasHeightForWidth())
         self.extraLabel_5.setSizePolicy(sizePolicy9)
         self.extraLabel_5.setMinimumSize(QSize(0, 0))
+        self.extraLabel_5.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_8.addWidget(self.extraLabel_5)
 
-        self.extraCloseColumnBtn_5 = QPushButton(self.topBarRightToolBox)
-        self.extraCloseColumnBtn_5.setObjectName(u"extraCloseColumnBtn_5")
-        sizePolicy1.setHeightForWidth(self.extraCloseColumnBtn_5.sizePolicy().hasHeightForWidth())
-        self.extraCloseColumnBtn_5.setSizePolicy(sizePolicy1)
-        self.extraCloseColumnBtn_5.setMinimumSize(QSize(0, 28))
-        self.extraCloseColumnBtn_5.setMaximumSize(QSize(28, 28))
-        self.extraCloseColumnBtn_5.setCursor(QCursor(Qt.PointingHandCursor))
-        self.extraCloseColumnBtn_5.setStyleSheet(u"border: none")
-        self.extraCloseColumnBtn_5.setIcon(icon)
-        self.extraCloseColumnBtn_5.setIconSize(QSize(20, 20))
-
-        self.horizontalLayout_8.addWidget(self.extraCloseColumnBtn_5)
-
         self.toolBoxButtonFrame = QFrame(self.rightToolBox)
         self.toolBoxButtonFrame.setObjectName(u"toolBoxButtonFrame")
-        self.toolBoxButtonFrame.setGeometry(QRect(9, 61, 182, 249))
+        self.toolBoxButtonFrame.setGeometry(QRect(9, 61, 182, 301))
         sizePolicy4.setHeightForWidth(self.toolBoxButtonFrame.sizePolicy().hasHeightForWidth())
         self.toolBoxButtonFrame.setSizePolicy(sizePolicy4)
         self.toolBoxButtonFrame.setMinimumSize(QSize(0, 249))
-        self.toolBoxButtonFrame.setMaximumSize(QSize(16777215, 275))
+        self.toolBoxButtonFrame.setMaximumSize(QSize(16777215, 16777215))
         self.toolBoxButtonFrame.setFrameShape(QFrame.StyledPanel)
         self.toolBoxButtonFrame.setFrameShadow(QFrame.Raised)
         self.verticalLayout_15 = QVBoxLayout(self.toolBoxButtonFrame)
         self.verticalLayout_15.setSpacing(10)
         self.verticalLayout_15.setObjectName(u"verticalLayout_15")
         self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
-        self.brushButton = QPushButton(self.toolBoxButtonFrame)
-        self.brushButton.setObjectName(u"brushButton")
-        sizePolicy1.setHeightForWidth(self.brushButton.sizePolicy().hasHeightForWidth())
-        self.brushButton.setSizePolicy(sizePolicy1)
-        self.brushButton.setMinimumSize(QSize(30, 38))
-        self.brushButton.setFont(font)
-        self.brushButton.setCursor(QCursor(Qt.PointingHandCursor))
-        self.brushButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
-".QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
-".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
-".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
-"")
-        icon8 = QIcon()
-        icon8.addFile(u":/icons/images/icons/icon-brush.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.brushButton.setIcon(icon8)
-        self.brushButton.setCheckable(True)
-        self.brushButton.setChecked(False)
-
-        self.verticalLayout_15.addWidget(self.brushButton)
-
         self.eraseButton = QPushButton(self.toolBoxButtonFrame)
         self.eraseButton.setObjectName(u"eraseButton")
         sizePolicy1.setHeightForWidth(self.eraseButton.sizePolicy().hasHeightForWidth())
@@ -1894,9 +1848,9 @@ class Ui_MainWindow(object):
 ".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 "")
-        icon9 = QIcon()
-        icon9.addFile(u":/icons/images/icons/icon-eraser.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.eraseButton.setIcon(icon9)
+        icon8 = QIcon()
+        icon8.addFile(u":/icons/images/icons/icon-eraser.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.eraseButton.setIcon(icon8)
         self.eraseButton.setCheckable(True)
         self.eraseButton.setChecked(False)
 
@@ -1914,9 +1868,9 @@ class Ui_MainWindow(object):
 ".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 "")
-        icon10 = QIcon()
-        icon10.addFile(u":/icons/images/icons/cil-share-boxed.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.gpsButton.setIcon(icon10)
+        icon9 = QIcon()
+        icon9.addFile(u":/icons/images/icons/cil-share-boxed.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.gpsButton.setIcon(icon9)
         self.gpsButton.setCheckable(True)
         self.gpsButton.setChecked(False)
 
@@ -1930,6 +1884,33 @@ class Ui_MainWindow(object):
         self.label.setAlignment(Qt.AlignCenter)
 
         self.verticalLayout_15.addWidget(self.label)
+
+        self.comboBox_3 = QComboBox(self.toolBoxButtonFrame)
+        self.comboBox_3.addItem("")
+        self.comboBox_3.addItem("")
+        self.comboBox_3.setObjectName(u"comboBox_3")
+
+        self.verticalLayout_15.addWidget(self.comboBox_3)
+
+        self.brushButton = QPushButton(self.toolBoxButtonFrame)
+        self.brushButton.setObjectName(u"brushButton")
+        sizePolicy1.setHeightForWidth(self.brushButton.sizePolicy().hasHeightForWidth())
+        self.brushButton.setSizePolicy(sizePolicy1)
+        self.brushButton.setMinimumSize(QSize(30, 38))
+        self.brushButton.setFont(font)
+        self.brushButton.setCursor(QCursor(Qt.PointingHandCursor))
+        self.brushButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
+".QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
+".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
+".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
+"")
+        icon10 = QIcon()
+        icon10.addFile(u":/icons/images/icons/cil-comment-square.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.brushButton.setIcon(icon10)
+        self.brushButton.setCheckable(True)
+        self.brushButton.setChecked(False)
+
+        self.verticalLayout_15.addWidget(self.brushButton)
 
         self.comboBox_2 = QComboBox(self.toolBoxButtonFrame)
         self.comboBox_2.addItem("")
@@ -1959,13 +1940,13 @@ class Ui_MainWindow(object):
 
         self.frame_2 = QFrame(self.rightToolBox)
         self.frame_2.setObjectName(u"frame_2")
-        self.frame_2.setGeometry(QRect(9, 316, 182, 238))
+        self.frame_2.setGeometry(QRect(9, 393, 182, 161))
         sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         sizePolicy10.setHorizontalStretch(0)
         sizePolicy10.setVerticalStretch(0)
         sizePolicy10.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
         self.frame_2.setSizePolicy(sizePolicy10)
-        self.frame_2.setMinimumSize(QSize(0, 238))
+        self.frame_2.setMinimumSize(QSize(0, 150))
         self.frame_2.setFrameShape(QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_13 = QHBoxLayout(self.frame_2)
@@ -2242,19 +2223,18 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem23.setText(QCoreApplication.translate("MainWindow", u"Line", None));
         self.tableWidget.setSortingEnabled(__sortingEnabled)
 
-        self.extraLabel_5.setText(QCoreApplication.translate("MainWindow", u"Tool Box", None))
-#if QT_CONFIG(tooltip)
-        self.extraCloseColumnBtn_5.setToolTip(QCoreApplication.translate("MainWindow", u"Close left box", None))
-#endif // QT_CONFIG(tooltip)
-        self.extraCloseColumnBtn_5.setText("")
-        self.brushButton.setText("")
+        self.extraLabel_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">Tool Box</span></p></body></html>", None))
         self.eraseButton.setText("")
         self.gpsButton.setText("")
-        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">A.I.</span></p></body></html>", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">AI Tool</span></p></body></html>", None))
+        self.comboBox_3.setItemText(0, QCoreApplication.translate("MainWindow", u"Steel Joint", None))
+        self.comboBox_3.setItemText(1, QCoreApplication.translate("MainWindow", u"Any others", None))
+
+        self.brushButton.setText(QCoreApplication.translate("MainWindow", u"GroundingDINO", None))
         self.comboBox_2.setItemText(0, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\uc7a5", None))
         self.comboBox_2.setItemText(1, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\ud3f4\ub354", None))
 
-        self.autoLabelButton.setText("")
+        self.autoLabelButton.setText(QCoreApplication.translate("MainWindow", u"JGAM", None))
         self.btn_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
         self.btn_print.setText(QCoreApplication.translate("MainWindow", u"Print", None))
         self.btn_logout.setText(QCoreApplication.translate("MainWindow", u"Logout", None))

@@ -4,6 +4,8 @@ os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = pow(2,40).__str__()
 
 import cv2
 
+from PIL import Image
+
 import numpy as np
 
 from numba import njit
@@ -15,6 +17,8 @@ import math
 
 import csv
 
+import submodules.GroundingDINO.groundingdino.datasets.transforms as T
+
 
 def imread(path: str, checkImg: bool=True) -> np.array:
     img = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -24,6 +28,24 @@ def imread(path: str, checkImg: bool=True) -> np.array:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
     
     return img
+
+def imread_GD(path: str):
+    img = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    pil_img = Image.fromarray(img)
+    img_width, img_height = pil_img.size
+
+    transform = T.Compose(
+        [T.RandomResize([800], max_size=1333),
+         T.ToTensor(),
+         T.Normalize([0.485,0.456,0.406], [0.229,0.224,0.225]),
+         ])
+
+    image_source = np.asarray(pil_img)
+    image_tr, _ = transform(pil_img.convert("RGB"), None)
+
+
+    return image_source, image_tr
 
 def imwrite(path:str,
             img: np.array
@@ -40,6 +62,93 @@ def imwrite_colormap(path, img):
     _, ext = os.path.splitext(path)
     _, label_to_file = cv2.imencode(ext, img)
     label_to_file.tofile(path)
+
+def logits_np_to_prob(logits):
+    exp_logits = np.exp(logits)
+    probs = exp_logits / np.sum(exp_logits)
+    return probs
+
+def softmax(logits):
+    # 각 행에 대해 소프트맥스 계산
+    exp_logits = np.exp(logits - np.max(logits, axis=1, keepdims=True))
+    softmax_probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
+    return softmax_probs
+    
+def min_max_normalize(data):
+    min_val = np.min(data)
+    max_val = np.max(data)
+    normalized_data = (data - min_val) / (max_val - min_val)
+    return normalized_data
+
+def extract_values_above_threshold(scores, threshold):
+    
+    binary_image = scores > threshold
+
+    return binary_image
+
+def column_based_sampling(gimage, mask, num_samples=10, num_columns=10):
+    rows, cols = mask.shape
+    col_step = cols // num_columns
+
+    sampled_coords = []
+
+    for j in range(num_columns):
+        col_start = j * col_step
+        col_end = (j + 1) * col_step if (j + 1) * col_step < cols else cols
+
+        region_mask = mask[:, col_start:col_end]
+        region_gimage = gimage[:, col_start:col_end]
+
+        region_coords = np.argwhere((region_mask) & (region_gimage != 0))
+        if region_coords.size == 0:
+            continue
+
+        region_pixel_values = [region_gimage[tuple(coord)] for coord in region_coords]
+
+        region_coords_values = list(zip(region_coords, region_pixel_values))
+
+        best_coord = sorted(region_coords_values, key=lambda x: x[1])[0][0]
+
+        best_coord_adjusted = (best_coord[0], best_coord[1] + col_start)
+        sampled_coords.append(best_coord_adjusted)
+
+        if len(sampled_coords) >= num_samples:
+            return np.array(sampled_coords)
+
+    return np.array(sampled_coords)
+
+def width_based_sampling(gimage, mask, num_samples=10, num_rows=10):
+    rows, cols = mask.shape
+    row_step = rows // num_rows
+
+    sampled_coords = []
+
+    for i in range(num_rows):
+        row_start = i * row_step
+        row_end = (i + 1) * row_step if (i + 1) * row_step < rows else rows
+
+        region_mask = mask[row_start:row_end, :]
+        region_gimage = gimage[row_start:row_end, :]
+
+        region_coords = np.argwhere((region_mask) & (region_gimage != 0))
+        if region_coords.size == 0:
+            continue
+
+        region_pixel_values = [region_gimage[tuple(coord)] for coord in region_coords]
+
+        region_coords_values = list(zip(region_coords, region_pixel_values))
+
+        best_coord = sorted(region_coords_values, key=lambda x: x[1])[0][0]
+
+        best_coord_adjusted = (best_coord[0] + row_start, best_coord[1])
+        sampled_coords.append(best_coord_adjusted)
+
+        if len(sampled_coords) >= num_samples:
+            return np.array(sampled_coords)
+
+    return np.array(sampled_coords)
+
+
 
 
 def createLayersFromLabel(label: np.array, 
@@ -155,7 +264,7 @@ def blendImageWithColorMap(
         palette = np.array([
             [0, 0, 0],
             [0, 0, 255],
-            [0, 255, 0],
+            [0, 0, 255],
             [0, 255, 255], 
             [255, 0, 0]
             ]), 
