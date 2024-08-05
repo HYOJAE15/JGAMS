@@ -110,6 +110,10 @@ class ImageFunctions(DNNFunctions):
         self.oldPos = None
         self.brush_class = 1
         # self.AltKey = False
+        self.pred_thr = 0.80
+        self.area_thr = 250
+        self.fill_thr = 250
+
         
         mainWidgets.mainImageViewer.mouseMoveEvent = self._mouseMoveEvent
         mainWidgets.mainImageViewer.mousePressEvent = self._mousePressPoint
@@ -458,6 +462,7 @@ class ImageFunctions(DNNFunctions):
         self.GD_max_y = max_y
 
         self.promptModel()
+        
         ## 2. Create SAM's Prompt 
     def promptModel(self):
         self.load_mmseg(self.mmseg_config, self.mmseg_checkpoint)
@@ -468,10 +473,7 @@ class ImageFunctions(DNNFunctions):
         back, joint, gap, logits = self.inference_mmseg(self.GD_img_roi)
 
 
-        pred_thr = 0.80
-        area_thr = 250
-        fill_thr = 250
-
+        
         """
         nomalize the segmentation logits
         """
@@ -491,9 +493,9 @@ class ImageFunctions(DNNFunctions):
         # joint
         joint_logit = logits[1, :, :]
         joint_score = min_max_normalize(joint_logit)
-        joint_bi = extract_values_above_threshold(joint_score, pred_thr)
-        joint_bi = morphology.remove_small_objects(joint_bi, area_thr)
-        joint_bi = morphology.remove_small_holes(joint_bi, fill_thr)
+        joint_bi = extract_values_above_threshold(joint_score, self.pred_thr)
+        joint_bi = morphology.remove_small_objects(joint_bi, self.area_thr)
+        joint_bi = morphology.remove_small_holes(joint_bi, self.fill_thr)
         
         joint_idx = np.argwhere(joint_bi == 1)
         joint_y_idx, joint_x_idx = joint_idx[:, 0], joint_idx[:, 1]
@@ -501,14 +503,14 @@ class ImageFunctions(DNNFunctions):
         joint_y_idx = joint_y_idx + self.GD_min_y
 
         self.label[joint_y_idx, joint_x_idx] = 1
-        # self.colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
+        self.colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
 
         # gap
         gap_logit = logits[2, :, :]
         gap_score = min_max_normalize(gap_logit)
-        gap_bi = extract_values_above_threshold(gap_score, pred_thr)
-        gap_bi = morphology.remove_small_objects(gap_bi, area_thr)
-        gap_bi = morphology.remove_small_holes(gap_bi, fill_thr)
+        gap_bi = extract_values_above_threshold(gap_score, self.pred_thr)
+        gap_bi = morphology.remove_small_objects(gap_bi, self.area_thr)
+        gap_bi = morphology.remove_small_holes(gap_bi, self.fill_thr)
         
         gap_idx = np.argwhere(gap_bi == 1)
         gap_y_idx, gap_x_idx = gap_idx[:, 0], gap_idx[:, 1]
@@ -516,6 +518,23 @@ class ImageFunctions(DNNFunctions):
         gap_y_idx = gap_y_idx + self.GD_min_y
 
         self.label[gap_y_idx, gap_x_idx] = 2
+        self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
+
+        img = img[:, :, :3]
+        prompt_colormap = blendImageWithColorMap(img, self.label) 
+
+        promptPath = self.imgPath.replace('/leftImg8bit/', '/promptLabelIds/')
+        promptPath = promptPath.replace( '_leftImg8bit.png', f'_prompt({self.pred_thr})_labelIds.png')
+        promptColormapPath = promptPath.replace(f'_prompt({self.pred_thr})_labelIds.png', f"_prompt({self.pred_thr})_color.png")        
+        os.makedirs(os.path.dirname(promptPath), exist_ok=True)
+        
+        print(f"prompt result: {promptPath}, {promptColormapPath}")
+        imwrite(promptPath, self.label) 
+        imwrite_colormap(promptColormapPath, prompt_colormap)
+
+        
+
+            
         # self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
 
         
@@ -553,22 +572,12 @@ class ImageFunctions(DNNFunctions):
         gap_coord = gap_coord[:, [1,0]]
         gap_label = np.ones((gap_coord.shape[0]), dtype=int)
 
-        print(f"joint coord: {joint_coord}")
-        print(f"joint label: {joint_label}")
-        
-        
-        print(f"gap coord: {gap_coord}")
-        print(f"gap label: {gap_label}")
-
         input_point = np.concatenate((gap_coord, joint_coord), axis=0)
         input_label = np.concatenate((gap_label, joint_label), axis=0)
         
         input_box = np.array([self.GD_min_x, self.GD_min_y, self.GD_max_x, self.GD_max_y])
 
-        print(f"point prompt: {input_point}")
-        print(f"label prompt: {input_label}")
-
-
+        
         if hasattr(self, 'sam_model') == False :
             self.load_sam(self.sam_checkpoint) 
 
@@ -591,11 +600,6 @@ class ImageFunctions(DNNFunctions):
         # update label with result
         idx = np.argwhere(mask == 1)
         y_idx, x_idx = idx[:, 0], idx[:, 1]
-
-        
-        # # cal Full Image coords
-        # y_idx = y_idx + self.GD_min_y
-        # x_idx = x_idx + self.GD_min_x
 
         self.GD_sam_y_idx = y_idx
         self.GD_sam_x_idx = x_idx
@@ -645,13 +649,15 @@ class ImageFunctions(DNNFunctions):
         os.makedirs(colormapPath, exist_ok=True)
         colormapPath = os.path.join(colormapPath, colormapName)
 
-        pointName = colormapName.replace("joint", "point")
+        pointName = colormapName.replace("_labelIds.png", "point.png")
         pointmapPath = os.path.join(os.path.dirname(colormapPath), pointName)
 
 
         imwrite_colormap(colormapPath, sam_colormap)
-        print(pointmapPath)
         cv2.imwrite(pointmapPath, img)
+        
+        print(f"colormapPath: {colormapPath}, pointmapPath:{pointmapPath}")
+        
 
 
 
