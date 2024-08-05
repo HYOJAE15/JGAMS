@@ -489,63 +489,72 @@ class ImageFunctions(DNNFunctions):
 
         # self.label[back_y_idx, back_x_idx] = 0
         # self.colormap[back_y_idx, back_x_idx, :3] = self.label_palette[0]
-
-        # joint
-        joint_logit = logits[1, :, :]
-        joint_score = min_max_normalize(joint_logit)
-        joint_bi = extract_values_above_threshold(joint_score, self.pred_thr)
-        joint_bi = morphology.remove_small_objects(joint_bi, self.area_thr)
-        joint_bi = morphology.remove_small_holes(joint_bi, self.fill_thr)
         
-        joint_idx = np.argwhere(joint_bi == 1)
-        joint_y_idx, joint_x_idx = joint_idx[:, 0], joint_idx[:, 1]
-        joint_x_idx = joint_x_idx + self.GD_min_x
-        joint_y_idx = joint_y_idx + self.GD_min_y
-
-        self.label[joint_y_idx, joint_x_idx] = 1
-        self.colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
-
-        # gap
-        gap_logit = logits[2, :, :]
-        gap_score = min_max_normalize(gap_logit)
-        gap_bi = extract_values_above_threshold(gap_score, self.pred_thr)
-        gap_bi = morphology.remove_small_objects(gap_bi, self.area_thr)
-        gap_bi = morphology.remove_small_holes(gap_bi, self.fill_thr)
         
-        gap_idx = np.argwhere(gap_bi == 1)
-        gap_y_idx, gap_x_idx = gap_idx[:, 0], gap_idx[:, 1]
-        gap_x_idx = gap_x_idx + self.GD_min_x
-        gap_y_idx = gap_y_idx + self.GD_min_y
-
-        self.label[gap_y_idx, gap_x_idx] = 2
-        self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
-
-        img = img[:, :, :3]
-        prompt_colormap = blendImageWithColorMap(img, self.label) 
-
-        promptPath = self.imgPath.replace('/leftImg8bit/', '/promptLabelIds/')
-        promptPath = promptPath.replace( '_leftImg8bit.png', f'_prompt({self.pred_thr})_labelIds.png')
-        promptColormapPath = promptPath.replace(f'_prompt({self.pred_thr})_labelIds.png', f"_prompt({self.pred_thr})_color.png")        
-        os.makedirs(os.path.dirname(promptPath), exist_ok=True)
+        # pt_label = copy.deepcopy(self.label)
+        # pt_colormap = copy.deepcopy(self.colormap)
         
-        print(f"prompt result: {promptPath}, {promptColormapPath}")
-        imwrite(promptPath, self.label) 
-        imwrite_colormap(promptColormapPath, prompt_colormap)
+        for thr in [0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]:
 
+            pt_label = copy.deepcopy(self.label)
+            pt_colormap = copy.deepcopy(self.colormap)
         
+            # joint
+            joint_logit = logits[1, :, :]
+            joint_score = min_max_normalize(joint_logit)
+            joint_bi = extract_values_above_threshold(joint_score, thr)
+            joint_bi = morphology.remove_small_objects(joint_bi, self.area_thr)
+            joint_bi = morphology.remove_small_holes(joint_bi, self.fill_thr)
+            
+            joint_idx = np.argwhere(joint_bi == 1)
+            joint_y_idx, joint_x_idx = joint_idx[:, 0], joint_idx[:, 1]
+            joint_x_idx = joint_x_idx + self.GD_min_x
+            joint_y_idx = joint_y_idx + self.GD_min_y
+
+            pt_label[joint_y_idx, joint_x_idx] = 1
+            pt_colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
+
+            # gap
+            gap_logit = logits[2, :, :]
+            gap_score = min_max_normalize(gap_logit)
+            gap_bi = extract_values_above_threshold(gap_score, thr)
+            gap_bi = morphology.remove_small_objects(gap_bi, self.area_thr)
+            gap_bi = morphology.remove_small_holes(gap_bi, self.fill_thr)
+            
+            gap_idx = np.argwhere(gap_bi == 1)
+            gap_y_idx, gap_x_idx = gap_idx[:, 0], gap_idx[:, 1]
+            gap_x_idx = gap_x_idx + self.GD_min_x
+            gap_y_idx = gap_y_idx + self.GD_min_y
+
+            pt_label[gap_y_idx, gap_x_idx] = 2
+            pt_colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
+
+            img = img[:, :, :3]
+            prompt_colormap = blendImageWithColorMap(img, pt_label) 
+
+            promptPath = self.imgPath.replace('/leftImg8bit/', '/promptLabelIds/')
+            promptPath = promptPath.replace( '_leftImg8bit.png', f'_prompt({thr})_labelIds.png')
+            promptColormapPath = promptPath.replace(f'_prompt({thr})_labelIds.png', f"_prompt({thr})_color.png")        
+            os.makedirs(os.path.dirname(promptPath), exist_ok=True)
+            
+            print(f"prompt result: {promptPath}, {promptColormapPath}")
+            imwrite(promptPath, pt_label) 
+            imwrite_colormap(promptColormapPath, prompt_colormap)
 
             
-        # self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
 
-        
-        # _colormap = copy.deepcopy(self.colormap)
-        # cv2.rectangle(_colormap, (self.GD_min_x, self.GD_min_y), (self.GD_max_x, self.GD_max_y), (255, 255, 255, 255), 3)
+                
+            # self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
 
-        # self.color_pixmap = QPixmap(cvtArrayToQImage(_colormap))
-        # self.color_pixmap_item.setPixmap(QPixmap())
-        # self.color_pixmap_item.setPixmap(self.color_pixmap)
+            
+            # _colormap = copy.deepcopy(self.colormap)
+            # cv2.rectangle(_colormap, (self.GD_min_x, self.GD_min_y), (self.GD_max_x, self.GD_max_y), (255, 255, 255, 255), 3)
 
-        self.pointSampling()
+            # self.color_pixmap = QPixmap(cvtArrayToQImage(_colormap))
+            # self.color_pixmap_item.setPixmap(QPixmap())
+            # self.color_pixmap_item.setPixmap(self.color_pixmap)
+
+        # self.pointSampling()
 
         ## 2.1. Point Sampling
     def pointSampling(self):
