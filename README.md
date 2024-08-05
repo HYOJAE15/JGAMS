@@ -3,6 +3,13 @@ Install JGAMS on Your Desktop
 
 Follow these steps to install CHALK on your desktop:
 
+0\. Create the new venv
+-----------------------------
+
+```
+conda create -n {venv} python=3.8
+```
+
 1\. Install Required Packages
 -----------------------------
 
