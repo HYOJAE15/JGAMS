@@ -19,6 +19,10 @@ import csv
 
 import submodules.GroundingDINO.groundingdino.datasets.transforms as T
 
+from skimage.measure import label, regionprops, regionprops_table
+from skimage import data, measure, morphology
+
+
 
 def imread(path: str, checkImg: bool=True) -> np.array:
     img = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -349,3 +353,24 @@ def getPrompt(ROI, point, label, path, OR_Rect):
         with open(path, "a", encoding="cp949", newline="") as f:
             write = csv.writer(f)
             write.writerow(samData_list)
+
+
+def getTop6Centroid(label, onlycenter = False):
+    top6 = []
+    labels = measure.label(label)
+    props = measure.regionprops(labels)
+    for region in props:
+        y, x = region.centroid
+        min_x, min_y, max_x, max_y = region.bbox
+        top6.append([region.area, (round(x), round(y)), (min_x, min_y, max_x, max_y)])
+        
+    top6.sort(reverse=True)
+    top6 = top6[0:6]
+
+    if onlycenter == True:
+        centers = []
+        for att in top6:
+            centers.append(att[1])
+
+    return top6 if onlycenter==False else centers
+    

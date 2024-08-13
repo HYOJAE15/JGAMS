@@ -30,9 +30,8 @@ from submodules.GroundingDINO.groundingdino.util import box_ops
 
 import torch
 
-import skimage.measure
-import skimage.filters
-from skimage import morphology
+from skimage.measure import label, regionprops, regionprops_table
+from skimage import data, measure, morphology
 
 import copy
 
@@ -432,30 +431,15 @@ class ImageFunctions(DNNFunctions):
                                                               )
         
         annotated_frame = annotate_GD(image_source=GD_img_source, boxes=boxes, logits=logits, phrases=phrases)
-        annotated_frame = annotated_frame[...,::-1] # BGR to RGB
-
+        annotated_frame = annotated_frame[...,::-1]
         index = logits.argmax()
         box = boxes[index]
 
-        # box : normalized box xywh -> unnormalized xyxy
         H, W, _ = GD_img_source.shape
         box_xyxy = box_ops.box_cxcywh_to_xyxy(box) * torch.Tensor([W, H, W, H])
 
-        # crop image
-        print(box_xyxy)
         min_x, min_y, max_x, max_y = box_xyxy.int().tolist()
-        print(f"{min_x}, {min_y}, {max_x}, {max_y}")
-
-        img = cvtPixmapToArray(self.pixmap)
-        img_roi = img[min_y:max_y, min_x:max_x, :3]
         
-        # _colormap = copy.deepcopy(self.colormap)        
-        # _colormap = cv2.rectangle(_colormap, (min_x, min_y), (max_x, max_y), (255, 255, 255, 255), 15)
-
-        # self.color_pixmap = QPixmap(cvtArrayToQImage(_colormap))
-        # self.color_pixmap_item.setPixmap(QPixmap())
-        # self.color_pixmap_item.setPixmap(self.color_pixmap)
-
         self.GD_min_x = min_x
         self.GD_min_y = min_y
         self.GD_max_x = max_x
@@ -465,15 +449,14 @@ class ImageFunctions(DNNFunctions):
         
         ## 2. Create SAM's Prompt 
     def promptModel(self):
-        self.load_mmseg(self.mmseg_config, self.mmseg_checkpoint)
         
+        if hasattr(self, 'mmseg_model') == False :
+            self.load_mmseg(self.mmseg_config, self.mmseg_checkpoint)
+
         img = cvtPixmapToArray(self.pixmap)
         self.GD_img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]
-        
         back, joint, gap, logits = self.inference_mmseg(self.GD_img_roi)
 
-
-        
         """
         nomalize the segmentation logits
         """
@@ -490,102 +473,98 @@ class ImageFunctions(DNNFunctions):
         # self.label[back_y_idx, back_x_idx] = 0
         # self.colormap[back_y_idx, back_x_idx, :3] = self.label_palette[0]
         
+        # joint
+        joint_logit = logits[1, :, :]
+        joint_score = min_max_normalize(joint_logit)
+        joint_bi = extract_values_above_threshold(joint_score, self.pred_thr)
+        joint_bi = morphology.remove_small_objects(joint_bi, self.area_thr)
+        joint_bi = morphology.remove_small_holes(joint_bi, self.fill_thr)
         
-        # pt_label = copy.deepcopy(self.label)
-        # pt_colormap = copy.deepcopy(self.colormap)
+        joint_idx = np.argwhere(joint_bi == 1)
+        joint_y_idx, joint_x_idx = joint_idx[:, 0], joint_idx[:, 1]
+        joint_x_idx = joint_x_idx + self.GD_min_x
+        joint_y_idx = joint_y_idx + self.GD_min_y
+
+        self.label[joint_y_idx, joint_x_idx] = 1
+        self.colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
+
+        # gap
+        gap_logit = logits[2, :, :]
+        gap_score = min_max_normalize(gap_logit)
+        gap_bi = extract_values_above_threshold(gap_score, self.pred_thr)
+        gap_bi = morphology.remove_small_objects(gap_bi, self.area_thr)
+        gap_bi = morphology.remove_small_holes(gap_bi, self.fill_thr)
         
-        for thr in [0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]:
+        gap_idx = np.argwhere(gap_bi == 1)
+        gap_y_idx, gap_x_idx = gap_idx[:, 0], gap_idx[:, 1]
+        gap_x_idx = gap_x_idx + self.GD_min_x
+        gap_y_idx = gap_y_idx + self.GD_min_y
 
-            pt_label = copy.deepcopy(self.label)
-            pt_colormap = copy.deepcopy(self.colormap)
+        self.label[gap_y_idx, gap_x_idx] = 2
+        self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
+
+        # visual
+        img = img[:, :, :3]
+        prompt_colormap = blendImageWithColorMap(img, self.label) 
+
+        promptPath = self.imgPath.replace('/leftImg8bit/', '/promptLabelIds/')
+        promptPath = promptPath.replace( '_leftImg8bit.png', f'_prompt({self.pred_thr})_labelIds.png')
+        promptColormapPath = promptPath.replace(f'_prompt({self.pred_thr})_labelIds.png', f"_prompt({self.pred_thr})_color.png")        
+        os.makedirs(os.path.dirname(promptPath), exist_ok=True)
         
-            # joint
-            joint_logit = logits[1, :, :]
-            joint_score = min_max_normalize(joint_logit)
-            joint_bi = extract_values_above_threshold(joint_score, thr)
-            joint_bi = morphology.remove_small_objects(joint_bi, self.area_thr)
-            joint_bi = morphology.remove_small_holes(joint_bi, self.fill_thr)
-            
-            joint_idx = np.argwhere(joint_bi == 1)
-            joint_y_idx, joint_x_idx = joint_idx[:, 0], joint_idx[:, 1]
-            joint_x_idx = joint_x_idx + self.GD_min_x
-            joint_y_idx = joint_y_idx + self.GD_min_y
+        imwrite(promptPath, self.label) 
+        imwrite_colormap(promptColormapPath, prompt_colormap)
 
-            pt_label[joint_y_idx, joint_x_idx] = 1
-            pt_colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
-
-            # gap
-            gap_logit = logits[2, :, :]
-            gap_score = min_max_normalize(gap_logit)
-            gap_bi = extract_values_above_threshold(gap_score, thr)
-            gap_bi = morphology.remove_small_objects(gap_bi, self.area_thr)
-            gap_bi = morphology.remove_small_holes(gap_bi, self.fill_thr)
-            
-            gap_idx = np.argwhere(gap_bi == 1)
-            gap_y_idx, gap_x_idx = gap_idx[:, 0], gap_idx[:, 1]
-            gap_x_idx = gap_x_idx + self.GD_min_x
-            gap_y_idx = gap_y_idx + self.GD_min_y
-
-            pt_label[gap_y_idx, gap_x_idx] = 2
-            pt_colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
-
-            img = img[:, :, :3]
-            prompt_colormap = blendImageWithColorMap(img, pt_label) 
-
-            promptPath = self.imgPath.replace('/leftImg8bit/', '/promptLabelIds/')
-            promptPath = promptPath.replace( '_leftImg8bit.png', f'_prompt({thr})_labelIds.png')
-            promptColormapPath = promptPath.replace(f'_prompt({thr})_labelIds.png', f"_prompt({thr})_color.png")        
-            os.makedirs(os.path.dirname(promptPath), exist_ok=True)
-            
-            print(f"prompt result: {promptPath}, {promptColormapPath}")
-            imwrite(promptPath, pt_label) 
-            imwrite_colormap(promptColormapPath, prompt_colormap)
-
-            
-
-                
-            # self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
-
-            
-            # _colormap = copy.deepcopy(self.colormap)
-            # cv2.rectangle(_colormap, (self.GD_min_x, self.GD_min_y), (self.GD_max_x, self.GD_max_y), (255, 255, 255, 255), 3)
-
-            # self.color_pixmap = QPixmap(cvtArrayToQImage(_colormap))
-            # self.color_pixmap_item.setPixmap(QPixmap())
-            # self.color_pixmap_item.setPixmap(self.color_pixmap)
-
-        # self.pointSampling()
+        self.pointSampling(erosion=False)
 
         ## 2.1. Point Sampling
-    def pointSampling(self):
+    def pointSampling(self, erosion=False):
         
-        img = np.array(Image.open(self.imgPath))
-	
         joint = self.label == 1
-        # joint = morphology.erosion(joint, morphology.square(15))
         gap = self.label == 2
-        # gap = morphology.erosion(gap, morphology.square(15))
         
+        if erosion == True:
+            joint = morphology.erosion(joint, morphology.square(15))
+            gap = morphology.erosion(gap, morphology.square(15))
+                
+        # img = np.array(Image.open(self.imgPath))
 
-        joint_col_coord = column_based_sampling(img, joint, num_samples=10, num_columns=10)
-        joint_row_coord = width_based_sampling(img, joint, num_samples=10, num_rows=10)
+        # joint_col_coord = column_based_sampling(img, joint, num_samples=10, num_columns=10)
+        # joint_row_coord = width_based_sampling(img, joint, num_samples=10, num_rows=10)
 
-        joint_coord = np.concatenate((joint_col_coord, joint_row_coord), axis=0)
-        joint_coord = joint_coord[:, [1,0]]
-        joint_label = np.zeros((joint_coord.shape[0]), dtype=int)
+        # joint_coord = np.concatenate((joint_col_coord, joint_row_coord), axis=0)
+        # joint_coord = joint_coord[:, [1,0]]
+        # joint_label = np.zeros((joint_coord.shape[0]), dtype=int)
 
-        gap_col_coord = column_based_sampling(img, gap, num_samples=10, num_columns=10)
-        gap_row_coord = width_based_sampling(img, gap, num_samples=10, num_rows=10)
+        # gap_col_coord = column_based_sampling(img, gap, num_samples=10, num_columns=10)
+        # gap_row_coord = width_based_sampling(img, gap, num_samples=10, num_rows=10)
 
-        gap_coord = np.concatenate((gap_col_coord, gap_row_coord), axis=0)
-        gap_coord = gap_coord[:, [1,0]]
-        gap_label = np.ones((gap_coord.shape[0]), dtype=int)
+        # gap_coord = np.concatenate((gap_col_coord, gap_row_coord), axis=0)
+        # gap_coord = gap_coord[:, [1,0]]
+        # gap_label = np.ones((gap_coord.shape[0]), dtype=int)
 
-        input_point = np.concatenate((gap_coord, joint_coord), axis=0)
-        input_label = np.concatenate((gap_label, joint_label), axis=0)
+        
+        
+        # top6 Area centroid point sampling
+        
+        # joint
+        top6_joint = getTop6Centroid(joint, onlycenter=True)
+        self.top6_joint = np.array(top6_joint)
+        self.top6_joint_label = np.zeros((self.top6_joint.shape[0]), dtype=int)
+        #gap
+        top6_gap = getTop6Centroid(gap, onlycenter=True)
+        self.top6_gap = np.array(top6_gap)
+        self.top6_gap_label = np.ones((self.top6_gap.shape[0]), dtype=int)
+
+        input_point = np.concatenate((self.top6_gap, self.top6_joint), axis=0)
+        input_label = np.concatenate((self.top6_gap_label, self.top6_joint_label), axis=0)
         
         input_box = np.array([self.GD_min_x, self.GD_min_y, self.GD_max_x, self.GD_max_y])
 
+        self.inferenceSAM(input_point, input_label, input_box)
+    
+        ## 3. SAM inference
+    def inferenceSAM(self, input_point, input_label, input_box):
         
         if hasattr(self, 'sam_model') == False :
             self.load_sam(self.sam_checkpoint) 
@@ -620,13 +599,15 @@ class ImageFunctions(DNNFunctions):
         self.label[y_idx, x_idx] = 2
         self.colormap[y_idx, x_idx, :3] = self.label_palette[2]
 
+        imwrite(self.labelPath, self.label)
+
         _colormap = copy.deepcopy(self.colormap)
 
-        for joint in joint_coord:
+        for joint in self.top6_joint:
             
             # cv2.circle(_colormap, (joint[0], joint[1]), 50, (0, 0, 255, 255), 9)
             cv2.circle(_colormap, (joint[0], joint[1]), 9, (0, 0, 255, 255), -1)
-        for gap in gap_coord:
+        for gap in self.top6_gap:
             
             # cv2.circle(_colormap, (gap[0], gap[1]), 50, (255, 0, 0, 255), 9)
             cv2.circle(_colormap, (gap[0], gap[1]), 9, (255, 0, 0, 255), -1)
@@ -640,11 +621,11 @@ class ImageFunctions(DNNFunctions):
         sam_colormap = blendImageWithColorMap(img, self.label) 
         img = imread(self.imgPath)
 
-        for joint in joint_coord:
+        for joint in self.top6_joint:
             
             cv2.circle(sam_colormap, (joint[0], joint[1]), 9, (255, 0, 0, 255), -1)
             cv2.circle(img, (joint[0], joint[1]), 9, (255, 0, 0, 255), -1)
-        for gap in gap_coord:
+        for gap in self.top6_gap:
             
             cv2.circle(sam_colormap, (gap[0], gap[1]), 9, (0, 0, 255, 255), -1)
             cv2.circle(img, (gap[0], gap[1]), 9, (0, 0, 255, 255), -1)
@@ -669,18 +650,6 @@ class ImageFunctions(DNNFunctions):
         
 
 
-
-
-
-        
-
-
-
-        
-    
-        ## 3. SAM inference
-    def inferenceSAM(self):
-        print("SAM")
 
         
     def drawRectangle(self, event):
