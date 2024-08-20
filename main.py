@@ -201,7 +201,13 @@ class MainWindow(
             self.ControlKey = True
 
         elif event.key() == 16777251: # alt key
-            self.inferenceGroundingDino()
+            if self.ControlKey:
+
+                self.inferenceGroundingDino(promptVerification=True)
+
+            else :
+                
+                self.inferenceGroundingDino()
 
         elif event.key() == 83: # S key 
             if self.ControlKey:

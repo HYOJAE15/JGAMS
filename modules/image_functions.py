@@ -412,7 +412,7 @@ class ImageFunctions(DNNFunctions):
         ####
 
         ## 1. Grounding DINO
-    def inferenceGroundingDino(self):
+    def inferenceGroundingDino(self, promptVerification=False):
         
         self.load_groundingDino(self.groundingDino_config, self.groundingDino_checkpoint)
         
@@ -445,10 +445,14 @@ class ImageFunctions(DNNFunctions):
         self.GD_max_x = max_x
         self.GD_max_y = max_y
 
-        self.promptModel()
+        if promptVerification:
+            self.promptModel(verification=True)
+        
+        else:
+            self.promptModel()
         
         ## 2. Create SAM's Prompt 
-    def promptModel(self):
+    def promptModel(self, verification=False):
         
         if hasattr(self, 'mmseg_model') == False :
             self.load_mmseg(self.mmseg_config, self.mmseg_checkpoint)
@@ -460,60 +464,61 @@ class ImageFunctions(DNNFunctions):
         """
         nomalize the segmentation logits
         """
-        # background
-        # back_logit = logits[0, :, :]
-        # back_score = min_max_normalize(back_logit)
-        # back_bi = extract_values_above_threshold(back_score, thr)
         
-        # back_idx = np.argwhere(back_bi == 1)
-        # back_y_idx, back_x_idx = back_idx[:, 0], back_idx[:, 1]
-        # back_x_idx = back_x_idx + self.GD_min_x
-        # back_y_idx = back_y_idx + self.GD_min_y
-
-        # self.label[back_y_idx, back_x_idx] = 0
-        # self.colormap[back_y_idx, back_x_idx, :3] = self.label_palette[0]
+        if len(np.nonzero(self.label[0])) > 0:
+                self.label = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+                
+        pred_thrs = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] if verification else [self.pred_thr]
         
-        # joint
-        joint_logit = logits[1, :, :]
-        joint_score = min_max_normalize(joint_logit)
-        joint_bi = extract_values_above_threshold(joint_score, self.pred_thr)
-        joint_bi = morphology.remove_small_objects(joint_bi, self.area_thr)
-        joint_bi = morphology.remove_small_holes(joint_bi, self.fill_thr)
-        
-        joint_idx = np.argwhere(joint_bi == 1)
-        joint_y_idx, joint_x_idx = joint_idx[:, 0], joint_idx[:, 1]
-        joint_x_idx = joint_x_idx + self.GD_min_x
-        joint_y_idx = joint_y_idx + self.GD_min_y
+        for thr in pred_thrs:
 
-        self.label[joint_y_idx, joint_x_idx] = 1
-        self.colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
+            prompt_label = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
 
-        # gap
-        gap_logit = logits[2, :, :]
-        gap_score = min_max_normalize(gap_logit)
-        gap_bi = extract_values_above_threshold(gap_score, self.pred_thr)
-        gap_bi = morphology.remove_small_objects(gap_bi, self.area_thr)
-        gap_bi = morphology.remove_small_holes(gap_bi, self.fill_thr)
-        
-        gap_idx = np.argwhere(gap_bi == 1)
-        gap_y_idx, gap_x_idx = gap_idx[:, 0], gap_idx[:, 1]
-        gap_x_idx = gap_x_idx + self.GD_min_x
-        gap_y_idx = gap_y_idx + self.GD_min_y
+            # joint
+            joint_logit = logits[1, :, :]
+            joint_score = min_max_normalize(joint_logit)
+            joint_bi = extract_values_above_threshold(joint_score, thr)
+            joint_bi = morphology.remove_small_objects(joint_bi, self.area_thr)
+            joint_bi = morphology.remove_small_holes(joint_bi, self.fill_thr)
+            
+            joint_idx = np.argwhere(joint_bi == 1)
+            joint_y_idx, joint_x_idx = joint_idx[:, 0], joint_idx[:, 1]
+            joint_x_idx = joint_x_idx + self.GD_min_x
+            joint_y_idx = joint_y_idx + self.GD_min_y
 
-        self.label[gap_y_idx, gap_x_idx] = 2
-        self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
+            prompt_label[joint_y_idx, joint_x_idx] = 1
+            if thr == 0.8:
+                self.label[joint_y_idx, joint_x_idx] = 1
+            # self.colormap[joint_y_idx, joint_x_idx, :3] = self.label_palette[1]
 
-        # visual
-        img = img[:, :, :3]
-        prompt_colormap = blendImageWithColorMap(img, self.label) 
+            # gap
+            gap_logit = logits[2, :, :]
+            gap_score = min_max_normalize(gap_logit)
+            gap_bi = extract_values_above_threshold(gap_score, thr)
+            gap_bi = morphology.remove_small_objects(gap_bi, self.area_thr)
+            gap_bi = morphology.remove_small_holes(gap_bi, self.fill_thr)
+            
+            gap_idx = np.argwhere(gap_bi == 1)
+            gap_y_idx, gap_x_idx = gap_idx[:, 0], gap_idx[:, 1]
+            gap_x_idx = gap_x_idx + self.GD_min_x
+            gap_y_idx = gap_y_idx + self.GD_min_y
 
-        promptPath = self.imgPath.replace('/leftImg8bit/', '/promptLabelIds/')
-        promptPath = promptPath.replace( '_leftImg8bit.png', f'_prompt({self.pred_thr})_labelIds.png')
-        promptColormapPath = promptPath.replace(f'_prompt({self.pred_thr})_labelIds.png', f"_prompt({self.pred_thr})_color.png")        
-        os.makedirs(os.path.dirname(promptPath), exist_ok=True)
-        
-        imwrite(promptPath, self.label) 
-        imwrite_colormap(promptColormapPath, prompt_colormap)
+            prompt_label[gap_y_idx, gap_x_idx] = 2
+            if thr == 0.8:
+                self.label[gap_y_idx, gap_x_idx] = 2
+            # self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
+
+            # visual
+            img = img[:, :, :3]
+            prompt_colormap = blendImageWithColorMap(img, prompt_label) 
+
+            promptPath = self.imgPath.replace('/leftImg8bit/', '/promptLabelIds/')
+            promptPath = promptPath.replace( '_leftImg8bit.png', f'_prompt({thr})_labelIds.png')
+            promptColormapPath = promptPath.replace(f'_prompt({thr})_labelIds.png', f"_prompt({thr})_color.png")        
+            os.makedirs(os.path.dirname(promptPath), exist_ok=True)
+            
+            imwrite(promptPath, prompt_label) 
+            imwrite_colormap(promptColormapPath, prompt_colormap)
 
         self.pointSampling(erosion=False)
 
