@@ -156,10 +156,10 @@ class ImageFunctions(DNNFunctions):
         self.use_erase = False
 
         """
-        Autolabel Tool
+        expansion Tool
         """
-        mainWidgets.autoLabelButton.clicked.connect(self.checkAutoLabelButton)
-        self.use_autolabel = False
+        mainWidgets.jgamButton.clicked.connect(self.checkExpansionTools)
+        self.use_jgam = False
 
         # mainWidgets.classList.itemSelectionChanged.connect(self.convertDNN)
         self.mmseg_status = False
@@ -191,20 +191,23 @@ class ImageFunctions(DNNFunctions):
         self.sam_y_idx = []
         self.sam_x_idx = []
         
-    def set_button_state(self, use_autolabel=False, use_refinement=False, use_brush=False, use_erase=False):
+    def set_button_state(self, use_jgam=False):
         """
         Set the state of the buttons
         """
-        self.use_autolabel = use_autolabel
-        self.use_refinement = use_refinement
-        self.use_brush = use_brush
-        self.use_erase = use_erase
-
-        mainWidgets.brushButton.setChecked(use_brush)
-        mainWidgets.eraseButton.setChecked(use_erase)
-        mainWidgets.autoLabelButton.setChecked(use_autolabel)
-        mainWidgets.gpsButton.setChecked(use_refinement)
+        self.use_jgam = use_jgam
         
+        mainWidgets.jgamButton.setChecked(use_jgam)
+        
+    def checkExpansionTools(self):
+        
+        if hasattr(self, 'imgPath') :
+
+            self.inferenceGroundingDino()
+        
+        else:
+            
+            print(f"no image")     
 
 
     def checkAutoLabelButton(self):
@@ -553,11 +556,11 @@ class ImageFunctions(DNNFunctions):
         # top6 Area centroid point sampling
         
         # joint
-        top6_joint = getTop6Centroid(joint, onlycenter=True)
+        top6_joint = getTop6Skeletonize(joint, onlycenter=True)
         self.top6_joint = np.array(top6_joint)
         self.top6_joint_label = np.zeros((self.top6_joint.shape[0]), dtype=int)
-        #gap
-        top6_gap = getTop6Centroid(gap, onlycenter=True)
+        # gap
+        top6_gap = getTop6Skeletonize(gap, onlycenter=True)
         self.top6_gap = np.array(top6_gap)
         self.top6_gap_label = np.ones((self.top6_gap.shape[0]), dtype=int)
 
