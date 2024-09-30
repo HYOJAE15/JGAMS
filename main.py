@@ -318,12 +318,3 @@ if __name__ == "__main__":
     
     window = MainWindow()
     sys.exit(app.exec())
-
-
-
-
-
-# test1 24.09.30
-#
-#
-#

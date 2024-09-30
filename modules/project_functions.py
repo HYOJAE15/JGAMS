@@ -163,6 +163,23 @@ class ProjectFunctions(object):
             
         with open(os.path.join(path, createProjectFile_name), 'w') as fp:
             json.dump(self.new_project_info, fp)
+            
+            
+        city_gt = os.path.join(path, "gtFine")
+        os.makedirs(city_gt , exist_ok=True)
+        
+        subfolders = ["train", "val", "test"]
+        for subfolder in subfolders:
+            city_gt_subfolder = os.path.join(city_gt, subfolder)
+            os.makedirs(city_gt_subfolder, exist_ok=True)
+
+        city_img = os.path.join(path, "leftImg8bit")
+        os.makedirs(city_img , exist_ok=True)
+        
+        for subfolder in subfolders:
+            city_img_subfolder = os.path.join(city_img, subfolder)
+            os.makedirs(city_img_subfolder, exist_ok=True)        
+
 
         self.projectClass.close()
 

@@ -373,4 +373,51 @@ def getTop6Centroid(label, onlycenter = False):
             centers.append(att[1])
 
     return top6 if onlycenter==False else centers
+
+def getTop6Skeletonize(label, onlycenter = False):
+    # 연결 영역 계산
+    top6_info = []
+    top6_idx = []
+    top6 = []
+    labels = measure.label(label)
+    props = measure.regionprops(labels)
+
+    for region in props:
+        min_x, min_y, max_x, max_y = region.bbox
+        top6_info.append([region.area, region.label, (min_x, min_y, max_x, max_y)])
+        
+    top6_info.sort(reverse=True)
+    top6_info = top6_info[0:6]
+    top6_idx = [info[1] for info in top6_info]
+
+    for idx in top6_idx:
+        msk = (labels == idx).astype(np.uint8)
+        top6.append(msk)
     
+    # 연결 영역이 발생하지 않은 경우 연산 중단
+    if len(top6) == 0:
+        return np.array([])
+    
+    # 연결 영역에 대한 Skeleton Point 계산
+    point_list = []
+
+    connect_mask = np.array(top6)
+    for i in range(connect_mask.shape[0]):
+        connect = connect_mask[i]
+        skeleton = morphology.skeletonize(connect)
+
+        y, x = np.nonzero(skeleton)
+
+        if len(x) > 0:
+            mid_x = x[np.abs((x-np.median(x))).argmin()].item()
+            mid_x_idx = np.nonzero(x == mid_x)[0]
+            mid_y_raw = y[mid_x_idx]
+            mid_y = mid_y_raw[np.abs((mid_y_raw-np.median(y))).argmin()].item()
+            point_list.append([top6_info[i][0], (mid_x, mid_y), top6_info[i][2]])
+        
+        if onlycenter == True:
+            points = []
+            for att in point_list:
+                points.append(att[1])
+
+    return point_list if onlycenter==False else points    
