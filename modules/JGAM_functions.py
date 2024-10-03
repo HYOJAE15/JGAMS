@@ -125,6 +125,7 @@ class JGAMFunctions(DNNFunctions):
         
     def checkExpansionTools(self):
         
+        ### JGAMS
         if hasattr(self, 'imgPath') :
             ## 1. Grounding DINO
             self.inferenceGroundingDino()
@@ -144,7 +145,15 @@ class JGAMFunctions(DNNFunctions):
             
             else :
                 print(f"No expansion joint")
-        
+
+            ## 4. Measure joint gap
+            image = cv2.imread(self.imgPath)
+            gap_mask = self.label == 2
+            # gap_mask = np.array(gap_mask, dtype=np.uint8)
+            
+            mask, image, region_data, all_thicknesses, all_thickness_positions = self.gap_measure(gap_mask, image)
+            print(f"region_data: {region_data}")
+
         else:
             print(f"No image")     
 
@@ -370,7 +379,9 @@ class JGAMFunctions(DNNFunctions):
         imwrite_colormap(colormapPath, sam_colormap)
         cv2.imwrite(pointmapPath, img)
         
-    def gap_measure(mask: np.ndarray,
+        ## 4. Measure joint gpa
+    def gap_measure(self,
+                    mask: np.ndarray,
                     image: np.ndarray,
                     pixel_resolution: float=0.5,
                     min_region_size: int=100):
@@ -386,49 +397,46 @@ class JGAMFunctions(DNNFunctions):
         Returns:
         두께 계산 결과
         """
-        try:
-            labeled_mask = label(mask, connectivity=1)
-            regions = regionprops(labeled_mask)
-            
-            if not regions:
-                return float('-inf')
-            
-            region_data = []
-            all_thicknesses = []
-            all_thickness_positions = []
-            
-            for region in regions:
-                if region.area >= min_region_size:
-                    region_mask = labeled_mask == region.label
-                    thicknesses, thickness_positions = calculate_thickness(region_mask, pixel_resolution)
+        labeled_mask = label(mask, connectivity=1)
+        regions = regionprops(labeled_mask)
+        
+        if not regions:
+            return float('-inf')
+        
+        region_data = []
+        all_thicknesses = []
+        all_thickness_positions = []
+        
+        for region in regions:
+            if region.area >= min_region_size:
+                region_mask = labeled_mask == region.label
+                thicknesses, thickness_positions = calculate_thickness(region_mask, pixel_resolution)
+                
+                if thicknesses:
+                    mean_thickness = np.mean(thicknesses)
+                    mode_thickness = calculate_mode(thicknesses)
                     
-                    if thicknesses:
-                        mean_thickness = np.mean(thicknesses)
-                        mode_thickness = calculate_mode(thicknesses)
-                        
-                        mean_positions = [pos for thickness, pos in zip(thicknesses, thickness_positions) if np.isclose(thickness, mean_thickness, atol = 0.1)]
-                        mode_positions = [pos for thickness, pos in zip(thicknesses, thickness_positions) if np.isclose(thickness, mode_thickness, atol = 0.1)]
-                        
-                        thickness_cv = np.std(thicknesses) / mean_thickness if mean_thickness != 0 else float('inf')
-                        
-                        region_data.append({
-                            'label': region.label,
-                            'thicknesses': thicknesses,
-                            'positions' : thickness_positions,
-                            'mean_thickness' : mean_thickness,
-                            'mode_thickness' : mode_thickness,
-                            'mean_positions' : mean_positions,
-                            'mode_positions' : mode_positions,
-                            'cv' : thickness_cv
-                        })
-                        
-                        all_thicknesses.extend(thicknesses)
-                        all_thickness_positions.extend(thickness_positions)
-            
-            return mask, image, region_data, all_thicknesses, all_thickness_positions
-        except Exception as e:
-            raise RuntimeError(f"Error calculating thickness: {e}")
-
+                    mean_positions = [pos for thickness, pos in zip(thicknesses, thickness_positions) if np.isclose(thickness, mean_thickness, atol = 0.1)]
+                    mode_positions = [pos for thickness, pos in zip(thicknesses, thickness_positions) if np.isclose(thickness, mode_thickness, atol = 0.1)]
+                    
+                    thickness_cv = np.std(thicknesses) / mean_thickness if mean_thickness != 0 else float('inf')
+                    
+                    region_data.append({
+                        'label': region.label,
+                        'thicknesses': thicknesses,
+                        'positions' : thickness_positions,
+                        'mean_thickness' : mean_thickness,
+                        'mode_thickness' : mode_thickness,
+                        'mean_positions' : mean_positions,
+                        'mode_positions' : mode_positions,
+                        'cv' : thickness_cv
+                    })
+                    
+                    all_thicknesses.extend(thicknesses)
+                    all_thickness_positions.extend(thickness_positions)
+        
+        return mask, image, region_data, all_thicknesses, all_thickness_positions
+        
      
 
             
