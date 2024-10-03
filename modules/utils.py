@@ -67,94 +67,6 @@ def imwrite_colormap(path, img):
     _, label_to_file = cv2.imencode(ext, img)
     label_to_file.tofile(path)
 
-def logits_np_to_prob(logits):
-    exp_logits = np.exp(logits)
-    probs = exp_logits / np.sum(exp_logits)
-    return probs
-
-def softmax(logits):
-    # 각 행에 대해 소프트맥스 계산
-    exp_logits = np.exp(logits - np.max(logits, axis=1, keepdims=True))
-    softmax_probs = exp_logits / np.sum(exp_logits, axis=1, keepdims=True)
-    return softmax_probs
-    
-def min_max_normalize(data):
-    min_val = np.min(data)
-    max_val = np.max(data)
-    normalized_data = (data - min_val) / (max_val - min_val)
-    return normalized_data
-
-def extract_values_above_threshold(scores, threshold):
-    
-    binary_image = scores > threshold
-
-    return binary_image
-
-def column_based_sampling(gimage, mask, num_samples=10, num_columns=10):
-    rows, cols = mask.shape
-    col_step = cols // num_columns
-
-    sampled_coords = []
-
-    for j in range(num_columns):
-        col_start = j * col_step
-        col_end = (j + 1) * col_step if (j + 1) * col_step < cols else cols
-
-        region_mask = mask[:, col_start:col_end]
-        region_gimage = gimage[:, col_start:col_end]
-
-        region_coords = np.argwhere((region_mask) & (region_gimage != 0))
-        if region_coords.size == 0:
-            continue
-
-        region_pixel_values = [region_gimage[tuple(coord)] for coord in region_coords]
-
-        region_coords_values = list(zip(region_coords, region_pixel_values))
-
-        best_coord = sorted(region_coords_values, key=lambda x: x[1])[0][0]
-
-        best_coord_adjusted = (best_coord[0], best_coord[1] + col_start)
-        sampled_coords.append(best_coord_adjusted)
-
-        if len(sampled_coords) >= num_samples:
-            return np.array(sampled_coords)
-
-    return np.array(sampled_coords)
-
-def width_based_sampling(gimage, mask, num_samples=10, num_rows=10):
-    rows, cols = mask.shape
-    row_step = rows // num_rows
-
-    sampled_coords = []
-
-    for i in range(num_rows):
-        row_start = i * row_step
-        row_end = (i + 1) * row_step if (i + 1) * row_step < rows else rows
-
-        region_mask = mask[row_start:row_end, :]
-        region_gimage = gimage[row_start:row_end, :]
-
-        region_coords = np.argwhere((region_mask) & (region_gimage != 0))
-        if region_coords.size == 0:
-            continue
-
-        region_pixel_values = [region_gimage[tuple(coord)] for coord in region_coords]
-
-        region_coords_values = list(zip(region_coords, region_pixel_values))
-
-        best_coord = sorted(region_coords_values, key=lambda x: x[1])[0][0]
-
-        best_coord_adjusted = (best_coord[0] + row_start, best_coord[1])
-        sampled_coords.append(best_coord_adjusted)
-
-        if len(sampled_coords) >= num_samples:
-            return np.array(sampled_coords)
-
-    return np.array(sampled_coords)
-
-
-
-
 def createLayersFromLabel(label: np.array, 
                           num_class: int
                           ) -> list([np.array]):
@@ -164,7 +76,6 @@ def createLayersFromLabel(label: np.array,
         layers.append(label == idx)
         
     return layers
-
 
 def cvtArrayToQImage(array: np.array) -> QImage:
 
@@ -218,7 +129,6 @@ def mapLabelToColorMap(label: np.array,
             colormap[x, y, :3] = palette[label[x, y]][:3]
 
     return colormap
-   
 
 def convertLabelToColorMap(
         label: np.array,
@@ -232,7 +142,6 @@ def convertLabelToColorMap(
     colormap[:, :, 3] = alpha
 
     return colormap
-
 
 def generateForNumberOfWindows(data, dimOrder, windowCount, overlapPercent, transforms=[]):
 	"""
@@ -262,17 +171,15 @@ def generateForNumberOfWindows(data, dimOrder, windowCount, overlapPercent, tran
 		overrideHeight = windowSizeY
 	)
 
-def blendImageWithColorMap(
-        image, 
-        label, 
-        palette = np.array([
-            [0, 0, 0],
-            [0, 255, 0],
-            [0, 0, 255],
-            [0, 255, 255], 
-            [255, 0, 0]
-            ]), 
-        alpha = 0.5
+def blendImageWithColorMap(image,
+                           label,
+                           palette = np.array([[0, 0, 0],
+                                               [0, 255, 0],
+                                               [0, 0, 255],
+                                               [0, 255, 255],
+                                               [255, 0, 0]
+                                               ]),
+                           alpha = 0.5
         ):
     """ blend image with color map 
     Args: 
@@ -355,69 +262,3 @@ def getPrompt(ROI, point, label, path, OR_Rect):
             write.writerow(samData_list)
 
 
-def getTop6Centroid(label, onlycenter = False):
-    top6 = []
-    labels = measure.label(label)
-    props = measure.regionprops(labels)
-    for region in props:
-        y, x = region.centroid
-        min_x, min_y, max_x, max_y = region.bbox
-        top6.append([region.area, (round(x), round(y)), (min_x, min_y, max_x, max_y)])
-        
-    top6.sort(reverse=True)
-    top6 = top6[0:6]
-
-    if onlycenter == True:
-        centers = []
-        for att in top6:
-            centers.append(att[1])
-
-    return top6 if onlycenter==False else centers
-
-def getTop6Skeletonize(label, onlycenter = False):
-    # 연결 영역 계산
-    top6_info = []
-    top6_idx = []
-    top6 = []
-    labels = measure.label(label)
-    props = measure.regionprops(labels)
-
-    for region in props:
-        min_x, min_y, max_x, max_y = region.bbox
-        top6_info.append([region.area, region.label, (min_x, min_y, max_x, max_y)])
-        
-    top6_info.sort(reverse=True)
-    top6_info = top6_info[0:6]
-    top6_idx = [info[1] for info in top6_info]
-
-    for idx in top6_idx:
-        msk = (labels == idx).astype(np.uint8)
-        top6.append(msk)
-    
-    # 연결 영역이 발생하지 않은 경우 연산 중단
-    if len(top6) == 0:
-        return np.array([])
-    
-    # 연결 영역에 대한 Skeleton Point 계산
-    point_list = []
-
-    connect_mask = np.array(top6)
-    for i in range(connect_mask.shape[0]):
-        connect = connect_mask[i]
-        skeleton = morphology.skeletonize(connect)
-
-        y, x = np.nonzero(skeleton)
-
-        if len(x) > 0:
-            mid_x = x[np.abs((x-np.median(x))).argmin()].item()
-            mid_x_idx = np.nonzero(x == mid_x)[0]
-            mid_y_raw = y[mid_x_idx]
-            mid_y = mid_y_raw[np.abs((mid_y_raw-np.median(y))).argmin()].item()
-            point_list.append([top6_info[i][0], (mid_x, mid_y), top6_info[i][2]])
-        
-        if onlycenter == True:
-            points = []
-            for att in point_list:
-                points.append(att[1])
-
-    return point_list if onlycenter==False else points    
