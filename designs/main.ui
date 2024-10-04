@@ -4205,7 +4205,7 @@ background-repeat: no-repeat;</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="autoLabelButton">
+                     <widget class="QPushButton" name="jgamButton">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                         <horstretch>0</horstretch>
@@ -4245,7 +4245,10 @@ background-repeat: no-repeat;</string>
                         <normaloff>:/icons/images/icons/icon-ai.png</normaloff>:/icons/images/icons/icon-ai.png</iconset>
                       </property>
                       <property name="checkable">
-                       <bool>true</bool>
+                       <bool>false</bool>
+                      </property>
+                      <property name="autoRepeat">
+                       <bool>false</bool>
                       </property>
                      </widget>
                     </item>

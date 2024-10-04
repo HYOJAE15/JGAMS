@@ -38,13 +38,17 @@ from modules.ui_functions import UIFunctions
 from modules.ui_main import Ui_MainWindow
 from modules.project_functions import ProjectFunctions
 from modules.image_functions import ImageFunctions
+from modules.JGAM_functions import JGAMFunctions
 from modules.utils import imwrite
 
 
-class MainWindow(
-    QMainWindow, UIFunctions, ProjectFunctions,
-    ImageFunctions
-    ):
+class MainWindow(QMainWindow,
+                 UIFunctions,
+                 ProjectFunctions,
+                 ImageFunctions,
+                 JGAMFunctions
+                 ):
+
     def __init__(self):
         QMainWindow.__init__(self)
 
@@ -62,6 +66,7 @@ class MainWindow(
 
         ProjectFunctions.__init__(self)
         ImageFunctions.__init__(self)
+        JGAMFunctions.__init__(self)
 
         """
         Load settings
@@ -200,14 +205,14 @@ class MainWindow(
         elif event.key() == 16777249: # Ctrl key
             self.ControlKey = True
 
-        elif event.key() == 16777251: # alt key
-            if self.ControlKey:
+        # elif event.key() == 16777251: # alt key
+        #     if self.ControlKey:
 
-                self.inferenceGroundingDino(promptVerification=True)
+        #         self.inferenceGroundingDino(promptVerification=True)
 
-            else :
+        #     else :
                 
-                self.inferenceGroundingDino()
+        #         self.inferenceGroundingDino()
 
         elif event.key() == 83: # S key 
             if self.ControlKey:
@@ -314,11 +319,9 @@ if __name__ == "__main__":
     # os.system("pyside6-uic designs/thumbnail_window.ui -o modules/ui_thumbnail_window.py")  
     
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("icon.ico"))
+    # app.setWindowIcon(QIcon("icon.ico"))
+    app.setWindowIcon(QIcon("icon_EXCI.ico"))
+
     
     window = MainWindow()
     sys.exit(app.exec())
-
-
-
-

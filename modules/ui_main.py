@@ -1919,24 +1919,25 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_15.addWidget(self.comboBox_2)
 
-        self.autoLabelButton = QPushButton(self.toolBoxButtonFrame)
-        self.autoLabelButton.setObjectName(u"autoLabelButton")
-        sizePolicy1.setHeightForWidth(self.autoLabelButton.sizePolicy().hasHeightForWidth())
-        self.autoLabelButton.setSizePolicy(sizePolicy1)
-        self.autoLabelButton.setMinimumSize(QSize(30, 38))
-        self.autoLabelButton.setFont(font)
-        self.autoLabelButton.setCursor(QCursor(Qt.PointingHandCursor))
-        self.autoLabelButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
+        self.jgamButton = QPushButton(self.toolBoxButtonFrame)
+        self.jgamButton.setObjectName(u"jgamButton")
+        sizePolicy1.setHeightForWidth(self.jgamButton.sizePolicy().hasHeightForWidth())
+        self.jgamButton.setSizePolicy(sizePolicy1)
+        self.jgamButton.setMinimumSize(QSize(30, 38))
+        self.jgamButton.setFont(font)
+        self.jgamButton.setCursor(QCursor(Qt.PointingHandCursor))
+        self.jgamButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
 ".QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 "")
         icon11 = QIcon()
         icon11.addFile(u":/icons/images/icons/icon-ai.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.autoLabelButton.setIcon(icon11)
-        self.autoLabelButton.setCheckable(True)
+        self.jgamButton.setIcon(icon11)
+        self.jgamButton.setCheckable(False)
+        self.jgamButton.setAutoRepeat(True)
 
-        self.verticalLayout_15.addWidget(self.autoLabelButton)
+        self.verticalLayout_15.addWidget(self.jgamButton)
 
         self.frame_2 = QFrame(self.rightToolBox)
         self.frame_2.setObjectName(u"frame_2")
@@ -2234,7 +2235,7 @@ class Ui_MainWindow(object):
         self.comboBox_2.setItemText(0, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\uc7a5", None))
         self.comboBox_2.setItemText(1, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\ud3f4\ub354", None))
 
-        self.autoLabelButton.setText(QCoreApplication.translate("MainWindow", u"JGAM", None))
+        self.jgamButton.setText(QCoreApplication.translate("MainWindow", u"JGAM", None))
         self.btn_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
         self.btn_print.setText(QCoreApplication.translate("MainWindow", u"Print", None))
         self.btn_logout.setText(QCoreApplication.translate("MainWindow", u"Logout", None))
