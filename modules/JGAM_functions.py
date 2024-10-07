@@ -301,24 +301,27 @@ class JGAMFunctions(DNNFunctions):
             self.load_sam(self.sam_checkpoint) 
 
         img = cvtPixmapToArray(self.pixmap)
-        img = img[:, :, :3]
+        # img = img[:, :, :3]
+        img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]
                 
-        self.sam_predictor.set_image(img)
+        self.sam_predictor.set_image(img_roi)
         
         
         masks, scores, logits = self.sam_predictor.predict(
             point_coords=input_point,
             point_labels=input_label,
-            box=input_box, 
             multimask_output=True,
         )
 
         mask = masks[np.argmax(scores), :, :]
-        self.sam_mask_input = logits[np.argmax(scores), :, :]
+        # self.sam_mask_input = logits[np.argmax(scores), :, :]
 
         # update label with result
         idx = np.argwhere(mask == 1)
         y_idx, x_idx = idx[:, 0], idx[:, 1]
+
+        x_idx = x_idx + self.GD_min_x
+        y_idx = y_idx + self.GD_min_y
 
         self.GD_sam_y_idx = y_idx
         self.GD_sam_x_idx = x_idx
