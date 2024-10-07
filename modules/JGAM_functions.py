@@ -91,14 +91,11 @@ class JGAMFunctions(DNNFunctions):
         mainWidgets.mainImageViewer.mousePressEvent = self._mousePressPoint
         mainWidgets.mainImageViewer.mouseReleaseEvent = self._mouseReleasePoint
         
-        mainWidgets.addImageButton.clicked.connect(self.addNewImage)
-        mainWidgets.deleteImageButton.clicked.connect(self.deleteImage)
-
         """
         Experiment
         """
 
-        self.promptVerification = False
+        self.promptVerification = True
         self.promptErosion = False
         
         """
@@ -219,7 +216,7 @@ class JGAMFunctions(DNNFunctions):
         if len(np.nonzero(self.label[0])) > 0:
                 self.label = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
                 
-        pred_thrs = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] if verification else [self.pred_thr]
+        pred_thrs = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] if verification else [self.pred_thr]
         
         for thr in pred_thrs:
 
@@ -304,24 +301,27 @@ class JGAMFunctions(DNNFunctions):
             self.load_sam(self.sam_checkpoint) 
 
         img = cvtPixmapToArray(self.pixmap)
-        img = img[:, :, :3]
+        # img = img[:, :, :3]
+        img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]
                 
-        self.sam_predictor.set_image(img)
+        self.sam_predictor.set_image(img_roi)
         
         
         masks, scores, logits = self.sam_predictor.predict(
             point_coords=input_point,
             point_labels=input_label,
-            box=input_box, 
             multimask_output=True,
         )
 
         mask = masks[np.argmax(scores), :, :]
-        self.sam_mask_input = logits[np.argmax(scores), :, :]
+        # self.sam_mask_input = logits[np.argmax(scores), :, :]
 
         # update label with result
         idx = np.argwhere(mask == 1)
         y_idx, x_idx = idx[:, 0], idx[:, 1]
+
+        x_idx = x_idx + self.GD_min_x
+        y_idx = y_idx + self.GD_min_y
 
         self.GD_sam_y_idx = y_idx
         self.GD_sam_x_idx = x_idx
