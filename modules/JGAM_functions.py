@@ -91,14 +91,11 @@ class JGAMFunctions(DNNFunctions):
         mainWidgets.mainImageViewer.mousePressEvent = self._mousePressPoint
         mainWidgets.mainImageViewer.mouseReleaseEvent = self._mouseReleasePoint
         
-        mainWidgets.addImageButton.clicked.connect(self.addNewImage)
-        mainWidgets.deleteImageButton.clicked.connect(self.deleteImage)
-
         """
         Experiment
         """
 
-        self.promptVerification = False
+        self.promptVerification = True
         self.promptErosion = False
         
         """
@@ -219,7 +216,7 @@ class JGAMFunctions(DNNFunctions):
         if len(np.nonzero(self.label[0])) > 0:
                 self.label = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
                 
-        pred_thrs = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] if verification else [self.pred_thr]
+        pred_thrs = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] if verification else [self.pred_thr]
         
         for thr in pred_thrs:
 
