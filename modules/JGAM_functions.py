@@ -14,9 +14,8 @@ from PySide6.QtWidgets import (
 
 from .ui_main import Ui_MainWindow
 from .ui_dino_prompt import Ui_DinoPrompt
+from .ui_prompt_model import Ui_promptModel
 from .ui_functions import UIFunctions
-from .ui_brush_menu import Ui_BrushMenu
-from .ui_erase_menu import Ui_EraseMenu
 from .app_settings import Settings
 from .dnn_functions import DNNFunctions
 
@@ -43,6 +42,24 @@ import copy
 
 from modules.image_functions import ImageFunctions
 
+
+class PromptModelWindow(QMainWindow, UIFunctions):
+    def __init__(self):
+        QMainWindow.__init__(self)
+
+        self.ui = Ui_promptModel()
+        self.ui.setupUi(self)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+
+        self.settings = Settings()
+
+        self.uiDefinitions()
+
+    def resizeEvent(self, event):
+        self.resize_grips()
+
+    def mousePressEvent(self, event):
+        self.dragPos = event.globalPos()
 
 class DinoPromptWindow(QMainWindow, UIFunctions):
     def __init__(self):
@@ -83,7 +100,7 @@ class JGAMFunctions(DNNFunctions):
         Attribute
         """
 
-        self.pred_thr = 0.80
+        self.pred_thr = 0.70
         self.area_thr = 250
         self.fill_thr = 250
         
@@ -95,30 +112,104 @@ class JGAMFunctions(DNNFunctions):
         Experiment
         """
 
-        self.promptVerification = True
+        self.promptVerification = False
         self.promptErosion = False
         
         """
         Pompt Tool
         """
-        mainWidgets.brushButton.clicked.connect(self.openBrushMenu)
 
-        self.BrushMenu = DinoPromptWindow()
-        self.BrushMenu.ui.lineEdit.returnPressed.connect(self.changePrompt)
+        self.use_GD = False
+        self.use_PM = False
+        
+        mainWidgets.GDButton.clicked.connect(self.openGD)
+        mainWidgets.PMButton.clicked.connect(self.openPM)
+
+        # Grounding-DINO
+        self.GD = DinoPromptWindow()
+        ## Enter 키와 "확인" 버튼에 기능을 탑재하라
+        self.GD.ui.lineEdit.returnPressed.connect(self.changePrompt)
+        
+        # Prompt Model (DeeplabV3+)
+        self.PM = PromptModelWindow()
+        self.PM.ui.thrSlider.valueChanged.connect(self.changeThreshold)
+        self.PM.ui.verCheckBox.stateChanged.connect(self.changeThrVerification)
+        
 
         """
         expansion Tool
         """
-        mainWidgets.jgamButton.clicked.connect(self.checkExpansionTools)
+
         self.use_jgam = False
     
-    def set_button_state(self, use_jgam=False):
+        mainWidgets.jgamButton.clicked.connect(self.checkExpansionTools)
+        
+    def openGD(self):
+        """
+        Open or Close Grounding DINO Prompt
+        """
+        if self.use_GD == False:
+            self.GD.show()
+            self.use_GD = True
+            # if hasattr(self, 'PM'):
+            #     self.PM.close()  
+            self.set_button_state(use_GD=self.use_GD, use_PM=self.use_PM)
+
+        elif self.use_GD == True:
+            self.GD.close()
+            self.use_GD = False
+            self.set_button_state(use_GD=self.use_GD, use_PM=self.use_PM)
+
+    
+    def openPM(self):
+        """
+        Open or Close Prompt Model Threshold Menu
+        """
+        if self.use_PM == False:
+            self.PM.show()
+            self.use_PM = True
+            # if hasattr(self, 'PM'):
+            #     self.PM.close()  
+            self.set_button_state(use_GD=self.use_GD, use_PM=self.use_PM)
+
+        elif self.use_PM == True:
+            self.PM.close()
+            self.use_PM = False
+            self.set_button_state(use_GD=self.use_GD, use_PM=self.use_PM)
+
+    def changePrompt(self):
+        self.GDPromptText = self.GD.ui.lineEdit.text()
+        print(self.GDPromptText)
+
+    def changeThreshold(self, value):
+        self.pred_thr = float(value/100)
+        self.PM.ui.brushSizeText.setText(str(f"{value} %"))
+    
+    def changeThrVerification(self):
+        if self.PM.ui.verCheckBox.isChecked():
+            self.promptVerification = True
+            print(self.promptVerification)
+            
+        if self.PM.ui.verCheckBox.isChecked() == False:
+            self.promptVerification = False
+            print(self.promptVerification)
+        
+    def set_button_state(self,
+                         use_jgam=False,
+                         use_GD=False,
+                         use_PM=False
+                         ):
         """
         Set the state of the buttons
         """
+        
         self.use_jgam = use_jgam
+        self.use_GD = use_GD
+        self.use_PM = use_PM
         
         mainWidgets.jgamButton.setChecked(use_jgam)
+        mainWidgets.GDButton.setChecked(use_GD)
+        mainWidgets.PMButton.setChecked(use_PM)
         
     def checkExpansionTools(self):
         
@@ -215,8 +306,10 @@ class JGAMFunctions(DNNFunctions):
         
         if len(np.nonzero(self.label[0])) > 0:
                 self.label = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+
+        print(f"promptModel status: {verification}, {self.pred_thr}")
                 
-        pred_thrs = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] if verification else [self.pred_thr]
+        pred_thrs = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99] if verification else [self.pred_thr]
         
         for thr in pred_thrs:
 
@@ -252,7 +345,7 @@ class JGAMFunctions(DNNFunctions):
             gap_y_idx = gap_y_idx + self.GD_min_y
 
             prompt_label[gap_y_idx, gap_x_idx] = 2
-            if thr == 0.8:
+            if thr == self.pred_thr:
                 self.label[gap_y_idx, gap_x_idx] = 2
             # self.colormap[gap_y_idx, gap_x_idx, :3] = self.label_palette[2]
 
@@ -301,27 +394,25 @@ class JGAMFunctions(DNNFunctions):
             self.load_sam(self.sam_checkpoint) 
 
         img = cvtPixmapToArray(self.pixmap)
-        # img = img[:, :, :3]
-        img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]
+        img = img[:, :, :3]
+        # img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]
                 
-        self.sam_predictor.set_image(img_roi)
+        self.sam_predictor.set_image(img)
         
         
         masks, scores, logits = self.sam_predictor.predict(
             point_coords=input_point,
             point_labels=input_label,
+            box=input_box, 
             multimask_output=True,
         )
 
         mask = masks[np.argmax(scores), :, :]
-        # self.sam_mask_input = logits[np.argmax(scores), :, :]
+        self.sam_mask_input = logits[np.argmax(scores), :, :]
 
         # update label with result
         idx = np.argwhere(mask == 1)
         y_idx, x_idx = idx[:, 0], idx[:, 1]
-
-        x_idx = x_idx + self.GD_min_x
-        y_idx = y_idx + self.GD_min_y
 
         self.GD_sam_y_idx = y_idx
         self.GD_sam_x_idx = x_idx
@@ -333,7 +424,7 @@ class JGAMFunctions(DNNFunctions):
         self.label[y_idx, x_idx] = 2
         self.colormap[y_idx, x_idx, :3] = self.label_palette[2]
 
-        imwrite(self.labelPath, self.label)
+        # imwrite(self.labelPath, self.label)
 
         _colormap = copy.deepcopy(self.colormap)
 

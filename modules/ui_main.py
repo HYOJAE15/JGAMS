@@ -1825,17 +1825,15 @@ class Ui_MainWindow(object):
 
         self.toolBoxButtonFrame = QFrame(self.rightToolBox)
         self.toolBoxButtonFrame.setObjectName(u"toolBoxButtonFrame")
-        self.toolBoxButtonFrame.setGeometry(QRect(9, 61, 182, 301))
+        self.toolBoxButtonFrame.setGeometry(QRect(9, 61, 182, 293))
         sizePolicy4.setHeightForWidth(self.toolBoxButtonFrame.sizePolicy().hasHeightForWidth())
         self.toolBoxButtonFrame.setSizePolicy(sizePolicy4)
-        self.toolBoxButtonFrame.setMinimumSize(QSize(0, 249))
+        self.toolBoxButtonFrame.setMinimumSize(QSize(182, 249))
         self.toolBoxButtonFrame.setMaximumSize(QSize(16777215, 16777215))
         self.toolBoxButtonFrame.setFrameShape(QFrame.StyledPanel)
         self.toolBoxButtonFrame.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_15 = QVBoxLayout(self.toolBoxButtonFrame)
-        self.verticalLayout_15.setSpacing(10)
-        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
-        self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_7 = QVBoxLayout(self.toolBoxButtonFrame)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.eraseButton = QPushButton(self.toolBoxButtonFrame)
         self.eraseButton.setObjectName(u"eraseButton")
         sizePolicy1.setHeightForWidth(self.eraseButton.sizePolicy().hasHeightForWidth())
@@ -1854,7 +1852,7 @@ class Ui_MainWindow(object):
         self.eraseButton.setCheckable(True)
         self.eraseButton.setChecked(False)
 
-        self.verticalLayout_15.addWidget(self.eraseButton)
+        self.verticalLayout_7.addWidget(self.eraseButton)
 
         self.gpsButton = QPushButton(self.toolBoxButtonFrame)
         self.gpsButton.setObjectName(u"gpsButton")
@@ -1874,7 +1872,7 @@ class Ui_MainWindow(object):
         self.gpsButton.setCheckable(True)
         self.gpsButton.setChecked(False)
 
-        self.verticalLayout_15.addWidget(self.gpsButton)
+        self.verticalLayout_7.addWidget(self.gpsButton)
 
         self.label = QLabel(self.toolBoxButtonFrame)
         self.label.setObjectName(u"label")
@@ -1883,41 +1881,54 @@ class Ui_MainWindow(object):
         self.label.setTextFormat(Qt.AutoText)
         self.label.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_15.addWidget(self.label)
+        self.verticalLayout_7.addWidget(self.label)
 
-        self.comboBox_3 = QComboBox(self.toolBoxButtonFrame)
-        self.comboBox_3.addItem("")
-        self.comboBox_3.addItem("")
-        self.comboBox_3.setObjectName(u"comboBox_3")
-
-        self.verticalLayout_15.addWidget(self.comboBox_3)
-
-        self.brushButton = QPushButton(self.toolBoxButtonFrame)
-        self.brushButton.setObjectName(u"brushButton")
-        sizePolicy1.setHeightForWidth(self.brushButton.sizePolicy().hasHeightForWidth())
-        self.brushButton.setSizePolicy(sizePolicy1)
-        self.brushButton.setMinimumSize(QSize(30, 38))
-        self.brushButton.setFont(font)
-        self.brushButton.setCursor(QCursor(Qt.PointingHandCursor))
-        self.brushButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
+        self.GDButton = QPushButton(self.toolBoxButtonFrame)
+        self.GDButton.setObjectName(u"GDButton")
+        sizePolicy1.setHeightForWidth(self.GDButton.sizePolicy().hasHeightForWidth())
+        self.GDButton.setSizePolicy(sizePolicy1)
+        self.GDButton.setMinimumSize(QSize(30, 38))
+        self.GDButton.setFont(font)
+        self.GDButton.setCursor(QCursor(Qt.PointingHandCursor))
+        self.GDButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
 ".QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 "")
         icon10 = QIcon()
         icon10.addFile(u":/icons/images/icons/cil-comment-square.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.brushButton.setIcon(icon10)
-        self.brushButton.setCheckable(True)
-        self.brushButton.setChecked(False)
+        self.GDButton.setIcon(icon10)
+        self.GDButton.setCheckable(True)
+        self.GDButton.setChecked(False)
 
-        self.verticalLayout_15.addWidget(self.brushButton)
+        self.verticalLayout_7.addWidget(self.GDButton)
+
+        self.PMButton = QPushButton(self.toolBoxButtonFrame)
+        self.PMButton.setObjectName(u"PMButton")
+        sizePolicy1.setHeightForWidth(self.PMButton.sizePolicy().hasHeightForWidth())
+        self.PMButton.setSizePolicy(sizePolicy1)
+        self.PMButton.setMinimumSize(QSize(30, 38))
+        self.PMButton.setFont(font)
+        self.PMButton.setCursor(QCursor(Qt.PointingHandCursor))
+        self.PMButton.setStyleSheet(u".QPushButton { background-color: rgb(52, 59, 72); border: none;  border-radius: 5px; }\n"
+".QPushButton:hover { background-color: rgb(44, 49, 57); border-style: solid; border-radius: 4px; }\n"
+".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
+".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
+"")
+        icon11 = QIcon()
+        icon11.addFile(u":/icons/images/icons/cil-equalizer.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.PMButton.setIcon(icon11)
+        self.PMButton.setCheckable(True)
+        self.PMButton.setChecked(False)
+
+        self.verticalLayout_7.addWidget(self.PMButton)
 
         self.comboBox_2 = QComboBox(self.toolBoxButtonFrame)
         self.comboBox_2.addItem("")
         self.comboBox_2.addItem("")
         self.comboBox_2.setObjectName(u"comboBox_2")
 
-        self.verticalLayout_15.addWidget(self.comboBox_2)
+        self.verticalLayout_7.addWidget(self.comboBox_2)
 
         self.jgamButton = QPushButton(self.toolBoxButtonFrame)
         self.jgamButton.setObjectName(u"jgamButton")
@@ -1931,13 +1942,13 @@ class Ui_MainWindow(object):
 ".QPushButton:pressed { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 ".QPushButton:checked { background-color: rgb(23, 26, 30); border-style: solid; border-radius: 4px; }\n"
 "")
-        icon11 = QIcon()
-        icon11.addFile(u":/icons/images/icons/icon-ai.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.jgamButton.setIcon(icon11)
+        icon12 = QIcon()
+        icon12.addFile(u":/icons/images/icons/icon-ai.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.jgamButton.setIcon(icon12)
         self.jgamButton.setCheckable(False)
-        self.jgamButton.setAutoRepeat(True)
+        self.jgamButton.setAutoRepeat(False)
 
-        self.verticalLayout_15.addWidget(self.jgamButton)
+        self.verticalLayout_7.addWidget(self.jgamButton)
 
         self.frame_2 = QFrame(self.rightToolBox)
         self.frame_2.setObjectName(u"frame_2")
@@ -2224,14 +2235,12 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem23.setText(QCoreApplication.translate("MainWindow", u"Line", None));
         self.tableWidget.setSortingEnabled(__sortingEnabled)
 
-        self.extraLabel_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" font-weight:600;\">Tool Box</span></p></body></html>", None))
+        self.extraLabel_5.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Tool Box</span></p></body></html>", None))
         self.eraseButton.setText("")
         self.gpsButton.setText("")
-        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">AI Tool</span></p></body></html>", None))
-        self.comboBox_3.setItemText(0, QCoreApplication.translate("MainWindow", u"Steel Joint", None))
-        self.comboBox_3.setItemText(1, QCoreApplication.translate("MainWindow", u"Any others", None))
-
-        self.brushButton.setText(QCoreApplication.translate("MainWindow", u"GroundingDINO", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p align=\"center\"><span style=\" font-size:11pt; font-weight:600;\">AI</span></p></body></html>", None))
+        self.GDButton.setText(QCoreApplication.translate("MainWindow", u"GroundingDINO", None))
+        self.PMButton.setText(QCoreApplication.translate("MainWindow", u"Prompt Model", None))
         self.comboBox_2.setItemText(0, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\uc7a5", None))
         self.comboBox_2.setItemText(1, QCoreApplication.translate("MainWindow", u"\uc774\ubbf8\uc9c0 1\ud3f4\ub354", None))
 
