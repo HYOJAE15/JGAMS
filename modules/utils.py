@@ -19,11 +19,6 @@ import csv
 
 import submodules.GroundingDINO.groundingdino.datasets.transforms as T
 
-from skimage.measure import label, regionprops, regionprops_table
-from skimage import data, measure, morphology
-
-
-
 def imread(path: str, checkImg: bool=True) -> np.array:
     img = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
 

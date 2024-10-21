@@ -20,16 +20,13 @@ import os
 import numpy as np
 
 os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = pow(2,40).__str__()
-
-import mmcv
-
 os.environ["QT_FONT_DPI"] = "96" # FIX Problem for High DPI and Scale above 100%
 
 from PySide6.QtCore import Qt, QParallelAnimationGroup
 from PySide6.QtGui import QIcon, QCursor
-from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QHeaderView
-)
+from PySide6.QtWidgets import (QApplication,
+                               QMainWindow,
+                               QHeaderView)
 
 from widgets import CustomGrip
 
@@ -189,44 +186,15 @@ class MainWindow(QMainWindow,
         btn.setStyleSheet(self.selectMenu(btn.styleSheet()))
 
     def keyPressEvent(self, event):
-
-        if event.key() == 65 : # A key
-            self.checkAutoLabelButton()
-
-        elif event.key() == 69 : # E key
-            self.openEraseMenu()
-
-        elif event.key() == 66 : # B key
-            self.openBrushMenu()
         
-        # elif event.key() == 71 : # G key
-        #     self.checkGrabCutButton()
-        
-        elif event.key() == 16777249: # Ctrl key
+        if event.key() == 16777249: # Ctrl key
             self.ControlKey = True
-
-        # elif event.key() == 16777251: # alt key
-        #     if self.ControlKey:
-
-        #         self.inferenceGroundingDino(promptVerification=True)
-
-        #     else :
-                
-        #         self.inferenceGroundingDino()
 
         elif event.key() == 83: # S key 
             if self.ControlKey:
-                if self.use_autolabel == True and self.brush_class != 0:
-                    print("END_SAM")
-                    self.startOrEndSAM()
+                 
                 imwrite(self.labelPath, self.label) 
         
-        elif event.key() == 70: # F key
-            if self.ControlKey:
-                self.inferenceFullyAutomaticLabeling()
-            
-            # Filling Hole 
-
         elif event.key() == 72: # H key
             # activate scroll move mode 
             self.scrollMove = True
@@ -235,23 +203,13 @@ class MainWindow(QMainWindow,
             print(event.key())
             
     def keyReleaseEvent(self, event):
-        # zoom
         if event.key() == 16777249: # ctrl key
             self.ControlKey = False
-
-        # elif event.key() == 16777251: # alt key
-        #     self.AltKey = False
-        #     print("alt-flase")
 
         elif event.key() == 72: # H key
             # deactivate scroll move mode 
             self.scrollMove = False
             
-        elif event.key() == 77: # M key
-            self.sam_mode = False
-            print(self.sam_mode)
-            # self.startOrEndSAM()
-
     def mousePressEvent(self, event):
         self.dragPos = event.globalPos()
 
@@ -319,7 +277,6 @@ if __name__ == "__main__":
     # os.system("pyside6-uic designs/thumbnail_window.ui -o modules/ui_thumbnail_window.py")  
     
     app = QApplication(sys.argv)
-    # app.setWindowIcon(QIcon("icon.ico"))
     app.setWindowIcon(QIcon("icon_EXCI.ico"))
 
     

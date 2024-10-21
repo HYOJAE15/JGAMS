@@ -4,13 +4,10 @@ os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = pow(2,40).__str__()
 
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import  QPixmap
-from PySide6.QtWidgets import (
-    QMainWindow, QFileSystemModel, QGraphicsScene, QFileDialog
-) 
+from PySide6.QtWidgets import (QMainWindow, QFileSystemModel) 
 
 from .ui_main import Ui_MainWindow
 from .ui_dino_prompt import Ui_DinoPrompt
@@ -20,12 +17,7 @@ from .app_settings import Settings
 from .dnn_functions import DNNFunctions
 
 from .utils import *
-from .utils_img import (annotate_GD, 
-                        getScaledPoint, 
-                        getScaledPoint_mmdet, 
-                        getCoordBTWTwoPoints, 
-                        applyBrushSize, 
-                        readImageToPixmap)
+from .utils_img import (annotate_GD)
 from .utils_JGAM import *
 
 from modules.utils import imwrite_colormap
@@ -34,14 +26,10 @@ from submodules.GroundingDINO.groundingdino.util import box_ops
 
 import torch
 
-from collections import Counter
-from skimage.measure import label, regionprops, regionprops_table
-from skimage import data, measure, morphology
+from skimage.measure import label, regionprops
+from skimage import morphology
 
 import copy
-
-from modules.image_functions import ImageFunctions
-
 
 class PromptModelWindow(QMainWindow, UIFunctions):
     def __init__(self):
@@ -99,14 +87,9 @@ class JGAMFunctions(DNNFunctions):
         """
         Attribute
         """
-
-        self.pred_thr = 0.70
+        self.pred_thr = 0.80
         self.area_thr = 250
         self.fill_thr = 250
-        
-        mainWidgets.mainImageViewer.mouseMoveEvent = self._mouseMoveEvent
-        mainWidgets.mainImageViewer.mousePressEvent = self._mousePressPoint
-        mainWidgets.mainImageViewer.mouseReleaseEvent = self._mouseReleasePoint
         
         """
         Experiment
@@ -143,7 +126,17 @@ class JGAMFunctions(DNNFunctions):
         self.use_jgam = False
     
         mainWidgets.jgamButton.clicked.connect(self.checkExpansionTools)
-        
+
+    def updateColorMap(self):
+        """
+        Update the color map
+        """
+        self.colormap = convertLabelToColorMap(self.label, self.label_palette, self.alpha)
+        self.color_pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        self.color_pixmap_item.setPixmap(QPixmap())
+        self.color_pixmap_item.setPixmap(self.color_pixmap)
+
+    
     def openGD(self):
         """
         Open or Close Grounding DINO Prompt

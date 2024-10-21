@@ -1,15 +1,9 @@
-import cv2
 import numpy as np
 
 from .utils import *
 
 from collections import Counter
-from skimage.measure import label, regionprops, regionprops_table
 from skimage import data, measure, morphology
-
-import copy
-
-from modules.image_functions import ImageFunctions
 
 def logits_np_to_prob(logits):
     exp_logits = np.exp(logits)
