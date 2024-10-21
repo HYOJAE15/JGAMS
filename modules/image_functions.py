@@ -191,4 +191,25 @@ class ImageFunctions(DNNFunctions):
 
         self.fixed_x = x
         self.fixed_y = y 
+
+    def updateColorMap(self):
+        """
+        Update the color map
+        """
+        self.colormap = convertLabelToColorMap(self.label, self.label_palette, self.alpha)
+        self.color_pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+        self.color_pixmap_item.setPixmap(QPixmap())
+        self.color_pixmap_item.setPixmap(self.color_pixmap)
+
+
+    def removeAllLabel(self):
+        self.label = np.zeros((self.label.shape[0], self.label.shape[1]), dtype=np.uint8)
         
+        self.colormap = convertLabelToColorMap(self.label, self.label_palette, self.alpha)
+        self.color_pixmap = QPixmap(cvtArrayToQImage(self.colormap))
+
+        self.color_pixmap_item.setPixmap(QPixmap())
+        self.color_pixmap_item.setPixmap(self.color_pixmap)
+
+
+    

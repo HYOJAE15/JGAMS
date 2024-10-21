@@ -198,7 +198,12 @@ class MainWindow(QMainWindow,
         elif event.key() == 72: # H key
             # activate scroll move mode 
             self.scrollMove = True
-            
+
+        elif event.key() == 82 : # R key
+            if self.ControlKey:
+                self.removeAllLabel()
+                imwrite(self.labelPath, self.label)
+                          
         else :
             print(event.key())
             

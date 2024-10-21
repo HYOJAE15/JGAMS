@@ -68,7 +68,6 @@ class DNNFunctions(object):
         self.sam_model = sam_model_registry[mode](checkpoint=checkpoint)
         self.sam_model.to(device='cuda:0')
         self.sam_predictor = SamPredictor(self.sam_model)
-        # self.set_sam_image()
         
     def set_sam_image(self):
         image = cvtPixmapToArray(self.pixmap)
