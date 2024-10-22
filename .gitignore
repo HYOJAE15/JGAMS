@@ -11,3 +11,5 @@
 build/*
 dist/*
 testImage/*
+.vscode/*
+bash.exe.stackdump
