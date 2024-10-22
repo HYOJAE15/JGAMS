@@ -121,4 +121,18 @@ pip install upgrade numpy==1.26.4
 pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 ```
 
+3. upgrade some.. LIBs
+```
+pip install upgrade pillow
+pip install upgrade regex
+pip install upgrade tokenizers==0.19
+```
+
+3. reinstall some.. LIBs
+```
+pip uninstall upgrade pillow
+pip uninstall upgrade regex
+pip uninstall upgrade tokenizers==0.19
+```
+
 
