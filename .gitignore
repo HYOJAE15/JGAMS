@@ -5,6 +5,7 @@
 *.zip
 *.pyz
 *.pth
+*.pt
 *.manifest
 *.pkg
 build/*
