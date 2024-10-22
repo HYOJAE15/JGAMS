@@ -100,3 +100,19 @@ Checkpoints for the JGAM function are available at the following links and shoul
 [GroundingDINO-B](https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha2/groundingdino_swinb_cogcoor.pth)
 
 Once you've completed these steps, JGAMS should be installed and ready to use on your desktop.
+
+
+
+
+## 24.10.22
+
+0. upgrade python version (python==3.10)
+--> conda install python=3.10
+
+1. upgrade numpy version
+--> pip install upgrade numpy==1.26.4
+
+2. upgrade torch version (torch==2.3.1)
+--> pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+
+
