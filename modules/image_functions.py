@@ -168,11 +168,6 @@ class ImageFunctions(DNNFunctions):
             mainWidgets.mainImageViewer.setFixedSize(self.scale * self.color_pixmap.size())
             mainWidgets.mainImageViewer.fitInView(self.pixmap_item)
 
-            if hasattr(self, 'sam_predictor'):
-                self.set_sam_image()
-                self.sam_x_idx = [] 
-                self.sam_y_idx = []
-    
     def _mousePressPoint(self, event):
         
         """

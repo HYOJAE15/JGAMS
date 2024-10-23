@@ -6,8 +6,15 @@ from .utils import cvtPixmapToArray
 from mmseg.apis import init_model, inference_model
 import numpy as np
 import skimage.morphology
+
 from segment_anything import sam_model_registry, SamPredictor
+
+# from submodules.SAM2.sam2.build_sam import build_sam2
+# from submodules.SAM2.sam2.sam2_image_predictor import SAM2ImagePredictor
+
 from submodules.GroundingDINO.groundingdino.util.inference import load_model, load_image, predict, annotate
+
+import torch
 
 class DNNFunctions(object):
     def __init__(self):
@@ -27,6 +34,9 @@ class DNNFunctions(object):
         
         # Segment Anything
         self.sam_checkpoint = 'dnn/checkpoints/sam_vit_h_4b8939.pth'
+
+        self.sam2_checkpoint = 'dnn/checkpoints/sam2.1_hiera_large.pt'
+        self.sam2_config = 'dnn/configs/sam2.1_hiera_l.yaml'
 
         #################### 
         # Object Detection #
@@ -68,7 +78,23 @@ class DNNFunctions(object):
         self.sam_model = sam_model_registry[mode](checkpoint=checkpoint)
         self.sam_model.to(device='cuda:0')
         self.sam_predictor = SamPredictor(self.sam_model)
-        
+    
+    # def load_sam2(self, config, checkpoint, mode='default'):
+    #     """
+    #     Load the sam model
+    #     Args:
+    #         mode (str): The mode of the sam model.
+    #     """
+
+    #     # use bfloat16 for the entire notebook
+    #     torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
+    #     # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
+    #     if torch.cuda.get_device_properties(0).major >= 8:
+    #         torch.backends.cuda.matmul.allow_tf32 = True
+    #         torch.backends.cudnn.allow_tf32 = True
+    #     self.sam2_model = build_sam2(config, checkpoint, device='cuda:0')
+    #     self.sam2_predictor = SAM2ImagePredictor(self.sam2_model)
+
     def set_sam_image(self):
         image = cvtPixmapToArray(self.pixmap)
         image = image[:, :, :3]
