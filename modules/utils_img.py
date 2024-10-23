@@ -133,23 +133,6 @@ def fast_coloring(X, Y, array, label_palette, brush_class, alpha = 50):
 
     return array 
 
-def annotate_GD(image_source, boxes, logits, phrases) -> np.ndarray:
-    h, w, _ = image_source.shape
-    boxes = boxes * torch.Tensor([w, h, w, h])
-    xyxy = box_convert(boxes=boxes, in_fmt="cxcywh", out_fmt="xyxy").numpy()
-    detections = sv.Detections(xyxy=xyxy)
-
-    labels = [
-        f"{phrase} {logit:.2f}"
-        for phrase, logit
-        in zip(phrases, logits)
-    ]
-
-    box_annotator = sv.BoxAnnotator(text_scale=3, text_thickness=5)
-    annotated_frame = cv2.cvtColor(image_source, cv2.COLOR_RGB2BGR)
-    annotated_frame = box_annotator.annotate(scene=annotated_frame, detections=detections, labels=labels)
-    return annotated_frame
-
 def getScaledPoint(event, scale):
     """
     get scaled point

@@ -17,7 +17,6 @@ from .app_settings import Settings
 from .dnn_functions import DNNFunctions
 
 from .utils import *
-from .utils_img import (annotate_GD)
 from .utils_JGAM import *
 
 from modules.utils import imwrite_colormap
@@ -217,6 +216,7 @@ class JGAMFunctions(DNNFunctions):
                 if len(input_point) > 0 :
                     ## 3. SAM inference
                     self.inferenceSAM(input_point, input_label, input_box)
+                    # self.inferenceSAM2(input_point, input_label, input_box)
                 else :
                     print(f"No point")
     
@@ -259,12 +259,6 @@ class JGAMFunctions(DNNFunctions):
                                                               text_threshold=TEXT_TRESHOLD,
                                                               )
         
-        annotated_frame = annotate_GD(image_source=GD_img_source,
-                                      boxes=boxes, logits=logits,
-                                      phrases=phrases
-                                      )
-        
-        annotated_frame = annotated_frame[...,::-1]
         index = logits.argmax()
         box = boxes[index]
 
@@ -440,7 +434,73 @@ class JGAMFunctions(DNNFunctions):
 
         imwrite_colormap(colormapPath, sam_colormap)
         cv2.imwrite(pointmapPath, img)
+
+        ## 3. SAM inference
+    # def inferenceSAM2(self, input_point, input_label, input_box):
         
+    #     if hasattr(self, 'sam2_model') == False :
+    #         self.load_sam2(self.sam2_config, self.sam2_checkpoint) 
+
+    #     img = cvtPixmapToArray(self.pixmap)
+    #     img = img[:, :, :3]
+    #     # img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]
+                
+    #     self.sam2_predictor.set_image(img)
+        
+    #     masks, scores, logits = self.sam2_predictor.predict(
+    #         point_coords=input_point,
+    #         point_labels=input_label,
+    #         box=input_box, 
+    #         multimask_output=True,
+    #     )
+
+    #     mask = masks[np.argmax(scores), :, :]
+        
+    #     # update label with result
+    #     idx = np.argwhere(mask == 1)
+    #     y_idx, x_idx = idx[:, 0], idx[:, 1]
+
+    #     self.label[self.label!=0] = 0
+    #     self.label[y_idx, x_idx] = 2
+
+    #     self.colormap = convertLabelToColorMap(self.label, self.label_palette, self.alpha)
+    #     self.colormap[y_idx, x_idx, :3] = self.label_palette[2]
+
+    #     imwrite(self.labelPath, self.label)
+
+    #     _colormap = copy.deepcopy(self.colormap)
+    #     sam_colormap = blendImageWithColorMap(img, self.label)
+    #     img = imread(self.imgPath)
+
+    #     for joint in self.top6_joint:
+    #         cv2.circle(_colormap, (joint[0], joint[1]), 9, (0, 0, 255, 255), -1)
+    #         cv2.circle(sam_colormap, (joint[0], joint[1]), 9, (255, 0, 0, 255), -1)
+    #         cv2.circle(img, (joint[0], joint[1]), 9, (255, 0, 0, 255), -1)
+        
+    #     for gap in self.top6_gap:
+    #         cv2.circle(_colormap, (gap[0], gap[1]), 9, (255, 0, 0, 255), -1)
+    #         cv2.circle(sam_colormap, (gap[0], gap[1]), 9, (0, 0, 255, 255), -1)
+    #         cv2.circle(img, (gap[0], gap[1]), 9, (0, 0, 255, 255), -1)
+
+    #     self.color_pixmap = QPixmap(cvtArrayToQImage(_colormap))
+    #     self.color_pixmap_item.setPixmap(QPixmap())
+    #     self.color_pixmap_item.setPixmap(self.color_pixmap)
+
+    #     colormapPath = os.path.dirname(self.labelPath)
+    #     colormapName = os.path.basename(self.labelPath)
+    #     colormapPath = os.path.dirname(colormapPath)
+    #     colormapPath = os.path.dirname(colormapPath)
+    #     colormapPath = os.path.join(colormapPath, "JGAM_colormap")
+    #     os.makedirs(colormapPath, exist_ok=True)
+    #     colormapPath = os.path.join(colormapPath, colormapName)
+
+    #     pointName = colormapName.replace("_labelIds.png", "_point.png")
+    #     pointmapPath = os.path.join(os.path.dirname(colormapPath), pointName)
+
+    #     imwrite_colormap(colormapPath, sam_colormap)
+    #     cv2.imwrite(pointmapPath, img)
+    
+
         ## 4. Measure joint gpa
     def gap_measure(self,
                     mask: np.ndarray,
