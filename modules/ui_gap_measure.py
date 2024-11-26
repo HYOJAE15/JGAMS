@@ -780,7 +780,7 @@ class Ui_gapMeasurement(object):
         self.closeAppBtn.setToolTip(QCoreApplication.translate("gapMeasurement", u"Close", None))
 #endif // QT_CONFIG(tooltip)
         self.closeAppBtn.setText("")
-        self.label.setText(QCoreApplication.translate("gapMeasurement", u"<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">GAP Distance (mm)</span></p></body></html>", None))
+        self.label.setText(QCoreApplication.translate("gapMeasurement", u"<html><head/><body><p><span style=\" font-size:16pt; font-weight:600;\">Joint gap distance (mm)</span></p></body></html>", None))
         self.gapLineEdit.setText(QCoreApplication.translate("gapMeasurement", u"00 mm", None))
         self.creditsLabel.setText(QCoreApplication.translate("gapMeasurement", u"JGAMS", None))
         self.version.setText(QCoreApplication.translate("gapMeasurement", u"v1.0.0", None))

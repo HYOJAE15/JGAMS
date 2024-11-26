@@ -231,27 +231,40 @@ class JGAMFunctions(DNNFunctions):
                 ## 2. Create SAM's Prompt
                 self.promptModel(self.promptVerification)
                 
-                ## 2.1 Point Sampling
-                input_point, input_label, input_box = self.pointSampling(self.promptErosion)
-                
-                if len(input_point) > 0 :
-                    ## 3. SAM inference
-                    self.inferenceSAM(input_point, input_label, input_box)
-                    # self.inferenceSAM2(input_point, input_label, input_box)
-                else :
-                    print(f"No point")
-    
+                ## 2.1 Sliding Window Crop
+                windows_selected = self.slidingWindowCrop()
+
+                ## 2.2 Inference with SAM
+                # Definition Part
+                self.total_gap = []
+                self.total_joint = []
+                self.label[self.label!=0] = 0
+
+                for wn in windows_selected:
+                    # 2.2.1 Crop
+                    x1, y1, x2, y2 = wn[0], wn[1], wn[2], wn[3]
+                    crop_img = self.GD_img_roi[y1:y2, x1:x2]
+                    crop_joint = self.joint_GD_roi[y1:y2, x1:x2]
+                    crop_gap = self.gap_GD_roi[y1:y2, x1:x2]
+
+                    # 2.2.2 Point Sampling
+                    input_point, input_label = self.pointSampling(crop_img, crop_joint, crop_gap, x1, y1, erosion=False)
+
+                    if len(input_point) > 0 :
+                        ## 3. SAM inference
+                        self.inferenceSAM(crop_img, input_point, input_label, x1, y1)
+                        # self.inferenceSAM2(input_point, input_label, input_box)
+                    else :
+                        print(f"No point")
             
             else :
                 print(f"No expansion joint")
 
-            ## 4. Measure joint gap
-            image = cv2.imread(self.imgPath)
-            gap_mask = self.label == 2
-            
-            mask, image, region_data, all_thicknesses, all_thickness_positions = self.gap_measure(gap_mask, image)
-            # print(f"region_data: {region_data}")
+            ## 4. Save Results
+            self.SaveImg()
 
+            ## 5. Measure joint gap
+            # Parameters
             PIXEL_TO_MM = 0.2
 
             # get masks
@@ -300,7 +313,7 @@ class JGAMFunctions(DNNFunctions):
                                 self.groundingDino_checkpoint
                                 )
         
-        GD_img_source, GD_img = imread_GD(self.imgPath)
+        self.GD_img_source, GD_img = imread_GD(self.imgPath)
         
         print(f"Grounding DINO status: {self.TEXT_PROMPT}")
 
@@ -317,7 +330,7 @@ class JGAMFunctions(DNNFunctions):
         index = logits.argmax()
         box = boxes[index]
 
-        H, W, _ = GD_img_source.shape
+        H, W, _ = self.GD_img_source.shape
         box_xyxy = box_ops.box_cxcywh_to_xyxy(box) * torch.Tensor([W, H, W, H])
 
         min_x, min_y, max_x, max_y = box_xyxy.int().tolist()
@@ -399,78 +412,103 @@ class JGAMFunctions(DNNFunctions):
             imwrite(promptPath, prompt_label) 
             imwrite_colormap(promptColormapPath, prompt_colormap)
 
-        ## 2.1. Point Sampling
-    def pointSampling(self, erosion=False):
-        
+        ## 2.1. Sliding Window Crop
+    def slidingWindowCrop(self):
+        # Crop with GDINO
         joint = self.label == 1
+        joint_bi = joint.astype(np.uint8)
+        self.joint_GD_roi = joint_bi[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x]
+
         gap = self.label == 2
+        gap_bi = gap.astype(np.uint8)
+        self.gap_GD_roi = gap_bi[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x]
+
+        # # Calculate Distance
+        # jmax, jmean, jmin = distance(joint_GD_roi)
+        # gamax, gmean, gmin = distance(gap_GD_roi)
+
+        # Set Window Size
+        wn_size = 300
+        overlap_per = 0.5
+
+        # Generate Windows
+        windows = sw.generate(self.GD_img_roi, sw.DimOrder.HeightWidthChannel, wn_size, overlap_per)
+        selected_windows = SelectWindow(windows, self.joint_GD_roi, self.gap_GD_roi)
         
+        return selected_windows
+
+        ## 2.2.2. Point Sampling
+    def pointSampling(self, img, joint, gap, x1, y1, erosion=False):    
         if erosion == True:
             joint = morphology.erosion(joint, morphology.square(15))
             gap = morphology.erosion(gap, morphology.square(15))
         
+        # Define Parameters
+        segments_num = 3
+        points_max_num = 4
+
         # joint
-        top6_joint = getTop6Skeletonize(joint, onlycenter=True)
-        self.top6_joint = np.array(top6_joint)
-        self.top6_joint_label = np.zeros((self.top6_joint.shape[0]), dtype=int)
+        joint_points = getPoints(joint, segments_num, points_max_num, onlypoint=True)
+        joint_labels = [0] * len(joint_points)
+
         # gap
-        top6_gap = getTop6Skeletonize(gap, onlycenter=True)
-        self.top6_gap = np.array(top6_gap)
-        self.top6_gap_label = np.ones((self.top6_gap.shape[0]), dtype=int)
+        gap_points = getPoints(gap, segments_num, points_max_num, onlypoint=True)
+        gap_labels = [1] * len(gap_points)
 
-        input_point = np.concatenate((self.top6_gap, self.top6_joint), axis=0)
-        input_label = np.concatenate((self.top6_gap_label, self.top6_joint_label), axis=0)
-        
-        input_box = np.array([self.GD_min_x, self.GD_min_y, self.GD_max_x, self.GD_max_y])
+        # Make Points for Window
+        input_point = np.concatenate((np.array(gap_points), np.array(joint_points)), axis=0)
+        input_label = np.concatenate((np.array(gap_labels), np.array(joint_labels)), axis=0)
 
-        return input_point, input_label, input_box
+        # Make Points For Image
+        self.total_joint = self.total_joint + [(t[0]+x1+self.GD_min_x, t[1]+y1+self.GD_min_y) for t in joint_points]
+        self.total_gap = self.total_gap + [(t[0]+x1+self.GD_min_x, t[1]+y1+self.GD_min_y) for t in gap_points]
+
+        return input_point, input_label
         
         ## 3. SAM inference
-    def inferenceSAM(self, input_point, input_label, input_box):
+    def inferenceSAM(self, img, input_point, input_label, x1, y1):
         
         if hasattr(self, 'sam_model') == False :
             self.load_sam(self.sam_checkpoint) 
-
-        img = cvtPixmapToArray(self.pixmap)
-        img = img[:, :, :3]
-        # img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]
                 
         self.sam_predictor.set_image(img)
         
         masks, scores, logits = self.sam_predictor.predict(
             point_coords=input_point,
             point_labels=input_label,
-            box=input_box, 
-            multimask_output=True,
+            multimask_output=True
         )
 
         mask = masks[np.argmax(scores), :, :]
         
         # update label with result
         idx = np.argwhere(mask == 1)
-        y_idx, x_idx = idx[:, 0], idx[:, 1]
+        y_idx, x_idx = idx[:, 0]+y1+self.GD_min_y, idx[:, 1]+x1+self.GD_min_x
 
-        self.label[self.label!=0] = 0
         self.label[y_idx, x_idx] = 2
 
+        ## 4. Save Image
+    def SaveImg(self):
+        label_idx = np.argwhere(self.label == 2)
+        y_idx, x_idx = label_idx[:, 0], label_idx[:, 1]
         self.colormap = convertLabelToColorMap(self.label, self.label_palette, self.alpha)
         self.colormap[y_idx, x_idx, :3] = self.label_palette[2]
 
         imwrite(self.labelPath, self.label)
 
         _colormap = copy.deepcopy(self.colormap)
-        sam_colormap = blendImageWithColorMap(img, self.label)
+        sam_colormap = blendImageWithColorMap(self.GD_img_source, self.label)
         img = imread(self.imgPath)
 
-        for joint in self.top6_joint:
-            cv2.circle(_colormap, (joint[0], joint[1]), 9, (0, 0, 255, 255), -1)
-            cv2.circle(sam_colormap, (joint[0], joint[1]), 9, (255, 0, 0, 255), -1)
-            cv2.circle(img, (joint[0], joint[1]), 9, (255, 0, 0, 255), -1)
+        for joint in self.total_joint:
+            cv2.circle(_colormap, (joint[0], joint[1]), 1, (0, 0, 255, 255), -1)
+            cv2.circle(sam_colormap, (joint[0], joint[1]), 1, (255, 0, 0, 255), -1)
+            cv2.circle(img, (joint[0], joint[1]), 1, (255, 0, 0, 255), -1)
         
-        for gap in self.top6_gap:
-            cv2.circle(_colormap, (gap[0], gap[1]), 9, (255, 0, 0, 255), -1)
-            cv2.circle(sam_colormap, (gap[0], gap[1]), 9, (0, 0, 255, 255), -1)
-            cv2.circle(img, (gap[0], gap[1]), 9, (0, 0, 255, 255), -1)
+        for gap in self.total_gap:
+            cv2.circle(_colormap, (gap[0], gap[1]), 1, (255, 0, 0, 255), -1)
+            cv2.circle(sam_colormap, (gap[0], gap[1]), 1, (0, 0, 255, 255), -1)
+            cv2.circle(img, (gap[0], gap[1]), 1, (0, 0, 255, 255), -1)
 
         self.color_pixmap = QPixmap(cvtArrayToQImage(_colormap))
         self.color_pixmap_item.setPixmap(QPixmap())
@@ -554,66 +592,5 @@ class JGAMFunctions(DNNFunctions):
 
     #     imwrite_colormap(colormapPath, sam_colormap)
     #     cv2.imwrite(pointmapPath, img)
-    
+        
 
-        ## 4. Measure joint gpa
-    def gap_measure(self,
-                    mask: np.ndarray,
-                    image: np.ndarray,
-                    pixel_resolution: float=0.5,
-                    min_region_size: int=100):
-        """
-        주어진 마스크와 이미지를 사용하여 유간을 계산합니다.
-
-        Args:
-        mask: 원본 탐지 마스크  
-        image: 원본 이미지
-        pixel_resolution: 픽셀 해상도 (기본값: 0.5mm)
-        min_region_size: 최소 영역 크기 (기본값: 100)
-
-        Returns:
-        두께 계산 결과
-        """
-        labeled_mask = label(mask, connectivity=1)
-        regions = regionprops(labeled_mask)
-        
-        if not regions:
-            return float('-inf')
-        
-        region_data = []
-        all_thicknesses = []
-        all_thickness_positions = []
-        
-        for region in regions:
-            if region.area >= min_region_size:
-                region_mask = labeled_mask == region.label
-                thicknesses, thickness_positions = calculate_thickness(region_mask, pixel_resolution)
-                
-                if thicknesses:
-                    mean_thickness = np.mean(thicknesses)
-                    mode_thickness = calculate_mode(thicknesses)
-                    
-                    mean_positions = [pos for thickness, pos in zip(thicknesses, thickness_positions) if np.isclose(thickness, mean_thickness, atol = 0.1)]
-                    mode_positions = [pos for thickness, pos in zip(thicknesses, thickness_positions) if np.isclose(thickness, mode_thickness, atol = 0.1)]
-                    
-                    thickness_cv = np.std(thicknesses) / mean_thickness if mean_thickness != 0 else float('inf')
-                    
-                    region_data.append({
-                        'label': region.label,
-                        'thicknesses': thicknesses,
-                        'positions' : thickness_positions,
-                        'mean_thickness' : mean_thickness,
-                        'mode_thickness' : mode_thickness,
-                        'mean_positions' : mean_positions,
-                        'mode_positions' : mode_positions,
-                        'cv' : thickness_cv
-                    })
-                    
-                    all_thicknesses.extend(thicknesses)
-                    all_thickness_positions.extend(thickness_positions)
-        
-        return mask, image, region_data, all_thicknesses, all_thickness_positions
-        
-     
-
-            

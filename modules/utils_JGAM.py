@@ -338,4 +338,207 @@ def find_two_modes(distances):
         # 모든 값이 같은 빈도를 가진 경우 첫 번째 최빈값 반환
         print("  모든 값이 동일한 빈도를 가짐")
         return first_mode
+    
+def distance(mask):
+    """
+    DeeplabV3+에서 반환된 mask의 y방향 거리를 계산합니다
+
+    Args:
+    mask: 0과 1로 이루어진 binary mask
+
+    Returns:
+    max_distance: y방향 거리의 최댓값
+    mean_distance: y방향 거리의 평균값
+    min_distance: y방향 거리의 최솟값
+    """
+
+    # Definition Part
+    distances = []
+
+    # Calculate Distances
+    for x in range(mask.shape[1]):
+        y_coords = np.where(mask[:, x] == 1)[0]
+
+        if len(y_coords) > 0:
+            y_max = np.max(y_coords)
+            y_min = np.min(y_coords)
+            distance = y_max - y_min
+            distances.append(distance)
+
+    # Calculate Max, Mean, Min
+    max_distance = np.max(distances)
+    mean_distance = np.mean(distances)
+    min_distance = np.min(distances)
+
+    return max_distance, mean_distance, min_distance
+
+def SelectWindow(windows, joint_mask, gap_mask):
+    """
+    SAM2를 이용하여 Inference할 영역들을 선택하는 계산을 수행합니다.
+
+    Args:
+    windows: Slidingwindow 라이브러리를 이용하여 연산된 slidingwindow 객체
+    joint_mask: 딥랩에서 탐지하고, Grounding DINO를 이용하여 crop한 유간 외 영역에 대한 binary mask
+    gap_mask: 딥랩에서 탐지하고, Grounding DINO를 이용하여 crop한 유간 영역에 대한 binary mask
+
+    Returns:
+    selected_windows: inference를 수행할 window들만 선택하여 (x1, y1, x2, y2) 형식으로 표현한 list
+    """
+
+    # Window Grouping
+    grouped_windows = {}
+
+    for wn in windows:
+        left_x = wn.x
+        if left_x not in grouped_windows:
+            grouped_windows[left_x] = []
+        grouped_windows[left_x].append(wn)
+
+    grouped_windows = list(grouped_windows.values())
+
+    # Select Window
+    selected_windows = []
+
+    for wns in grouped_windows:
+        raw_windows = []
+        joint_sums = []
+        gap_sums = []
+
+        wn_start = wns[0]
+        wn_end = wns[-1]
+
+        w, h = wn_start.w, wn_start.h
+        x1 = wn_start.x 
+        x2 = x1 + w
+
+        y_start = wn_start.y
+        y_end = wn_end.y + h
+
+        if y_start == y_end - h:
+            y1, y2 = y_start, y_start+h
+            joint_sum = np.sum(joint_mask[y1:y2, x1:x2])
+            gap_sum = np.sum(gap_mask[y1:y2, x1:x2])
+            if joint_sum!=0 and gap_sum!=0:
+                selected_windows.append((x1, y1, int(x2), int(y2)))
+            else:
+                continue
+
+        for y in range(y_start, y_end-h, 1):
+            y1, y2 = y, y+h
+            joint_sum = np.sum(joint_mask[y1:y2, x1:x2])
+            gap_sum = np.sum(gap_mask[y1:y2, x1:x2])
+
+            if joint_sum!=0 and gap_sum!=0:
+                joint_sums.append(joint_sum)
+                gap_sums.append(gap_sum)
+                raw_windows.append((x1, y1, int(x2), int(y2)))
+        
+        if len(raw_windows) > 0 :
+            gap_sum_max = max(gap_sums)
+            max_idxs = [idx for idx, val in enumerate(gap_sums) if val==gap_sum_max]
+            mid_idx = int(len(max_idxs)/2)
+            selected_window = raw_windows[max_idxs[mid_idx]]
+            selected_windows.append(selected_window)
+    
+    if len(selected_windows) <= 0:
+        print("There are no gap pixels detected in the Prompt Model.")
+    return selected_windows
+
+def getSKPoints(label, label_index, points_num, segment_size):
+    """
+    SAM2에 입력될 Point Prompt를 추출하는 연산을 수행합니다.
+    (아래 getPoints 함수의 기능함수)
+
+    Args:
+    label: Point를 뽑아낼 영역의 0/1로 된 binary mask
+    label_index: 해당 label이 몇 번째 분할의 label인지를 나타내는 인덱스 지표
+    points_num: 해당 label에서 뽑아낼 point의 개수
+    segment_size: 해당 label(분할)의 너비
+
+    Returns:
+    points: 해당 label에서 추출된 point의 좌표
+    """
+
+    ## 연결 영역 계산
+    # Definition Part
+    area_info = []
+    area_idx = []
+    selected_area = []
+
+    # Calculate Connected Area
+    labels = measure.label(label)
+    props = measure.regionprops(labels)
+
+    for region in props:
+        min_x, min_y, max_x, max_y = region.bbox
+        min_x = min_x+(label_index*segment_size)
+        max_x = max_x+(label_index*segment_size)
+        area_info.append((region.area, region.label, (min_x, min_y, max_x, max_y)))
+    
+    # Select Connected Area
+    area_info.sort(reverse=True)
+    area_info = area_info[0:points_num]
+    area_idx = [a[1] for a in area_info]
+
+    for idx in area_idx:
+        mask = (labels == idx).astype(np.uint8)
+        selected_area.append(mask)
+    
+    ## 연결 영역이 발생하지 않은 경우 빈 list 반환
+    if len(selected_area) <= 0:
+        return []
+
+    ## Skeleton Point 계산
+    points = []
+
+    connect_mask = np.array(selected_area)
+    for i in range(connect_mask.shape[0]):
+        connect = connect_mask[i]
+        skeleton = morphology.skeletonize(connect)
+
+        y, x = np.nonzero(skeleton)
+
+        if len(x) > 0:
+            mid_x = x[np.abs((x-np.median(x))).argmin()].item()
+            mid_x_idx = np.nonzero(x == mid_x)[0]
+            mid_y_raw = y[mid_x_idx]
+            mid_y = mid_y_raw[np.abs((mid_y_raw-np.median(y))).argmin()].item()
+            points.append((area_info[i][0], (mid_x+(label_index*segment_size), mid_y), area_info[i][2]))
+        else:
+            continue
+    
+    return points
+
+def getPoints(label, segments_num = 3, points_num = 3, onlypoint = False):
+    """
+    SAM2에 입력될 Point Prompt를 추출하는 연산을 수행합니다.
+
+    Args:
+    label: Point를 뽑아낼 영역의 0/1로 된 binary mask
+    segments_num: 해당 label을 세로로 몇 분할 할지에 대한 숫자(기본값:3분할)
+    points_num: 해당 label의 각 분할에서 최대 몇 개의 point를 뽑아낼지에 대한 숫자(기본값: 3개)
+
+    Returns:
+    only_points: 해당 label에서 추출된 point의 좌표
+    """
+
+    # Definition Part
+    points = []
+
+    # Segment label
+    h, w = label.shape
+    seg_w = int(np.floor((w/segments_num) * 10) / 10)
+    labels = [label[:, (i*seg_w):((i+1)*seg_w)] for i in range(segments_num)]
+
+    # Generate Points
+    l_idx = 0
+    for l in labels:
+        points = points + getSKPoints(l, l_idx, points_num, seg_w)
+        l_idx = l_idx + 1
+
+    # Get Points Only
+    only_points = [p[1] for p in points]
+
+    return points if onlypoint==False else only_points
+
 
