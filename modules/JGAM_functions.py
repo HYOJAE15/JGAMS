@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QMainWindow, QFileSystemModel)
 from .ui_main import Ui_MainWindow
 from .ui_dino_prompt import Ui_DinoPrompt
 from .ui_prompt_model import Ui_promptModel
+from .ui_gap_measure import Ui_gapMeasurement
 from .ui_functions import UIFunctions
 from .app_settings import Settings
 from .dnn_functions import DNNFunctions
@@ -66,7 +67,23 @@ class DinoPromptWindow(QMainWindow, UIFunctions):
     def mousePressEvent(self, event):
         self.dragPos = event.globalPos()
 
+class GapMeasureWindow(QMainWindow, UIFunctions):
+    def __init__(self):
+        QMainWindow.__init__(self)
 
+        self.ui = Ui_gapMeasurement()
+        self.ui.setupUi(self)
+        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+
+        self.settings = Settings()
+
+        self.uiDefinitions()
+
+    def resizeEvent(self, event):
+        self.resize_grips()
+
+    def mousePressEvent(self, event):
+        self.dragPos = event.globalPos()
 
 
 class JGAMFunctions(DNNFunctions):
@@ -118,8 +135,10 @@ class JGAMFunctions(DNNFunctions):
         self.PM = PromptModelWindow()
         self.PM.ui.thrSlider.valueChanged.connect(self.changeThreshold)
         self.PM.ui.verCheckBox.stateChanged.connect(self.changeThrVerification)
-        
 
+        self.GM = GapMeasureWindow()
+        ## Enter 키와 "확인" 버튼에 기능을 탑재하라
+        
         """
         expansion Tool
         """
@@ -206,6 +225,8 @@ class JGAMFunctions(DNNFunctions):
 
             self.inferenceGroundingDino()
 
+            self.GM.close()
+
             if self.GD_min_x or self.GD_min_y or self.GD_max_x or self.GD_max_y :
                 ## 2. Create SAM's Prompt
                 self.promptModel(self.promptVerification)
@@ -230,6 +251,40 @@ class JGAMFunctions(DNNFunctions):
             
             mask, image, region_data, all_thicknesses, all_thickness_positions = self.gap_measure(gap_mask, image)
             # print(f"region_data: {region_data}")
+
+            PIXEL_TO_MM = 0.2
+
+            # get masks
+            image = cv2.imread(self.imgPath)
+            gap_mask = self.label == 2
+            gap_mask_t = gap_mask.astype(np.bool).T
+
+            # Calculate Gap Ranges
+            transition_ranges = find_transition_ranges(gap_mask_t)
+
+            # Calculate Gap Distances
+            filtered_distances = get_distances_by_segment(transition_ranges)
+
+            mm_distances = []
+            for segment in filtered_distances:
+                mm_distances.append([data['distance'] * PIXEL_TO_MM for data in segment])
+            
+            # Select Most Frequent Distance
+            representative_distances = []
+
+            # 필터링된 구간에 대해 최빈값 계산
+            for i, distances in enumerate(mm_distances):
+                if len(distances) > 0:
+                    representative_distance = find_two_modes(distances)
+                    representative_distances.append(representative_distance)
+
+            # Calculate Gap Distance
+            final_gap = np.sum(np.array(representative_distances))
+            final_gap = round(final_gap, 3)
+            print(f"최종 유간 측정 결과: {final_gap}mm")
+            self.GM.show()
+            self.GM.ui.gapLineEdit.setText(str(f"{final_gap} mm"))
+
 
         else:
             print(f"No image")     
@@ -277,7 +332,7 @@ class JGAMFunctions(DNNFunctions):
     def promptModel(self, verification=False):
         
         if hasattr(self, 'mmseg_model') == False :
-            self.load_mmseg(self.mmseg_config, self.mmseg_checkpoint)
+            self.load_mmseg(self.mmseg_config_v2, self.mmseg_checkpoint_v2)
 
         img = cvtPixmapToArray(self.pixmap)
         self.GD_img_roi = img[self.GD_min_y:self.GD_max_y, self.GD_min_x:self.GD_max_x, :3]

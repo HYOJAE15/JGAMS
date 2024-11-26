@@ -32,6 +32,10 @@ class DNNFunctions(object):
         self.mmseg_config = 'dnn/configs/promptModel.py'
         self.mmseg_checkpoint = 'dnn/checkpoints/promptModel.pth'
         
+        # MMSegmentation
+        self.mmseg_config_v2 = 'dnn/configs/promptModelV2.py'
+        self.mmseg_checkpoint_v2 = 'dnn/checkpoints/promptModelV2.pth'
+
         # Segment Anything
         self.sam_checkpoint = 'dnn/checkpoints/sam_vit_h_4b8939.pth'
 

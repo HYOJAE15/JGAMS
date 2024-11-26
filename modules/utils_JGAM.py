@@ -230,3 +230,112 @@ def calculate_mode(values,
     value_counts = Counter(rounded_values)
     mode = max(value_counts, key=value_counts.get)
     return mode
+
+def merge_close_ranges(ranges, threshold=5):
+    if not ranges:
+        return []
+    
+    merged = []
+    current_start, current_end = ranges[0]
+    
+    for next_start, next_end in ranges[1:]:
+        # 현재 구간의 끝점과 다음 구간의 시작점의 차이가 threshold보다 작으면
+        if next_start - current_end <= threshold:
+            # 구간을 확장
+            current_end = next_end
+        else:
+            # 새로운 구간 시작
+            merged.append((current_start, current_end))
+            current_start, current_end = next_start, next_end
+    
+    # 마지막 구간 추가
+    merged.append((current_start, current_end))
+    
+    return merged
+
+def find_transition_ranges(mask):
+    transition_ranges = []
+    for i in range(mask.shape[0]):
+        row = mask[i, :]
+        ranges = []
+        in_range = False
+        start = -1
+        for idx in range(len(row)):
+            if not in_range and row[idx]:
+                in_range = True
+                start = idx
+            elif in_range and not row[idx]:
+                in_range = False
+                ranges.append((start, idx))
+        if in_range:
+            ranges.append((start, len(row)))
+            
+        # 가까운 구간들을 병합
+        merged_ranges = merge_close_ranges(ranges)
+        transition_ranges.append(merged_ranges)
+    return transition_ranges
+
+def get_distances_by_segment(transition_ranges, threshold_ratio=0.9):
+    # 먼저 각 구간별 거리 계산
+    max_segments = max(len(ranges) for ranges in transition_ranges if ranges)
+    segment_data = [[] for _ in range(max_segments)]  # 각 구간별로 거리와 좌표를 저장할 리스트
+    
+    # 각 행을 순회하면서 구간별 거리 및 좌표 수집
+    for row_index, ranges in enumerate(transition_ranges):
+        if ranges:
+            for i, (start, end) in enumerate(ranges):
+                distance = end - start
+                segment_data[i].append({
+                    'distance': distance,
+                    'start': start,
+                    'end': end,
+                    'row': row_index  # 이 행(row_index)의 위치를 기록 (x 좌표 역할을 할 수 있음)
+                })
+    
+    # 각 행의 구간 개수 확인 및 분포 확인
+    segment_counts = [len(ranges) for ranges in transition_ranges if ranges]
+    count_distribution = Counter(segment_counts)
+    # print("구간 개수 분포:", dict(count_distribution))
+    
+    # 가장 많은 거리 개수 찾기
+    max_distance_count = max(len(segment) for segment in segment_data)
+    threshold_count = max_distance_count * threshold_ratio
+    # print(f"최대 거리 개수: {max_distance_count}")
+    # print(f"임계값(90%): {threshold_count}")
+    
+    # 임계값을 넘는 구간만 선택
+    filtered_segment_data = []
+    for segment in segment_data:
+        if len(segment) >= threshold_count:
+            filtered_segment_data.append(segment)
+    
+    # print("\n필터링 후 구간 통계:")
+    # for i, segment in enumerate(filtered_segment_data):
+    #     print(f"구간 {i+1}:")
+    #     print(f"  거리 개수: {len(segment)}")
+    #     if len(segment) > 0:
+    #         distances = [data['distance'] for data in segment]
+    #         print(f"  평균 거리: {np.mean(distances):.2f}")
+    #         print(f"  거리 범위: {min(distances)} ~ {max(distances)}")
+    
+    return filtered_segment_data
+
+def find_two_modes(distances):
+    # 거리들의 빈도 계산
+    counter = Counter(distances)
+    
+    # 첫 번째 최빈값 찾기
+    first_mode = max(counter.items(), key=lambda x: x[1])[0]
+    
+    # 첫 번째 최빈값을 제외한 새로운 Counter 생성
+    counter.pop(first_mode)
+    
+    # counter가 비어있지 않은 경우에만 두 번째 최빈값 찾기
+    if counter:
+        second_mode = max(counter.items(), key=lambda x: x[1])[0]
+        return min(first_mode, second_mode)
+    else:
+        # 모든 값이 같은 빈도를 가진 경우 첫 번째 최빈값 반환
+        print("  모든 값이 동일한 빈도를 가짐")
+        return first_mode
+
